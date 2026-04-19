@@ -1,15 +1,13 @@
-import { useEffect } from "react";
-import axios from "axios";
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
-
-  useEffect(() => {
-    axios.get("http://localhost:5000/")
-      .then(res => console.log(res.data))
-      .catch(err => console.error(err));
-  }, []);
-
-  return <h1>AxonX Frontend Running 🚀</h1>;
+  return (
+    <Router>
+      <AppRoutes />
+    </Router>
+  );
 }
 
 export default App;
