@@ -266,7 +266,6 @@ const Users = () => {
                             <h4 className="text-[0.65rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-12 flex items-center gap-3"><Info size={18} className="text-blue-500" /> Identity Details</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 font-sans text-left">
                                 <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Email Address</p><p className="text-sm font-black text-blue-600 underline underline-offset-4 decoration-blue-100 italic">{u.email}</p></div>
-                                <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Identity ID Record</p><p className="text-[0.65rem] font-mono text-slate-500 bg-slate-50 p-2 rounded-xl border border-slate-100">{u._id}</p></div>
                                 <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">System Node</p><p className="text-sm font-black text-slate-700">Maharashtra, India (IN)</p></div>
                                 <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Biological Info</p><p className="text-sm font-black text-slate-700 capitalize">{u.gender || 'Not Disclosed'} <span className="mx-2 opacity-30">•</span> {u.dob ? new Date(u.dob).toLocaleDateString() : 'N/A'}</p></div>
                             </div>

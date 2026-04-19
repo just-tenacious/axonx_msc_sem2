@@ -65,14 +65,14 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--bg-color)] p-8 transition-colors duration-500">
+        <div className="min-h-screen pt-24 pb-8 flex items-center justify-center bg-[var(--bg-color)] px-8 transition-colors duration-500">
             <ThemeToggle />
-            
+
             <div className="pro-card w-full max-w-[650px] p-10 text-center animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="flex justify-center mb-6">
                     <Logo className="h-14" />
                 </div>
-                
+
                 <h1 className="text-2xl font-black text-[var(--text-main)] mb-1">Sign Up</h1>
                 <p className="text-[var(--text-muted)] mb-8 font-bold text-sm">Create your AxonX account</p>
 
@@ -162,7 +162,7 @@ const Register = () => {
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[0.65rem] font-black text-[var(--text-muted)] uppercase ml-2 flex items-center gap-1">
-                                <Lock size={10} /> Confirm
+                                <Lock size={10} /> Confirm Password
                             </label>
                             <div className="relative group">
                                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary-accent)] z-10 transition-colors">
@@ -174,7 +174,7 @@ const Register = () => {
                     </div>
 
                     <div className="pt-4">
-                        <button 
+                        <button
                             type="submit"
                             disabled={loading}
                             className="pro-hover-lift w-full py-3.5 rounded-xl bg-gradient-to-r from-[#0ea5e9] to-[#1e40af] text-white font-black text-md shadow-lg shadow-blue-500/20 disabled:opacity-50 flex items-center justify-center gap-2"

@@ -15,9 +15,9 @@ const Navbar = () => {
   };
 
   const linkClass = (path) =>
-    `text-[0.65rem] font-black uppercase tracking-[0.2em] transition-all relative py-1 ${isActive(path)
-      ? 'text-blue-500 after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-500'
-      : 'text-slate-600 dark:text-slate-400 hover:text-blue-500'
+    `text-sm font-bold transition-all relative py-1 ${isActive(path)
+      ? 'text-slate-900 dark:text-white'
+      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
     }`;
 
   const handleLogout = () => {
@@ -45,7 +45,7 @@ const Navbar = () => {
             }}
             className="font-black italic"
           >
-            ⬡
+            <img src="/light-mode.png" alt="AxonX Logo" className="h-10 w-auto" />
           </span>
 
           <span
@@ -69,12 +69,12 @@ const Navbar = () => {
         </Link>
 
         {/* 🔷 CENTER NAV */}
-        <ul className="hidden lg:flex items-center gap-10 list-none m-0 p-0">
-          <li><Link to="/" className={linkClass('/')}>Ecosystem</Link></li>
+        <ul className="hidden lg:flex items-center gap-8 list-none m-0 p-0">
+          <li><Link to="/" className={linkClass('/')}>Home</Link></li>
           <li><Link to="/departments" className={linkClass('/departments')}>Departments</Link></li>
           <li><Link to="/events" className={linkClass('/events')}>Events</Link></li>
           <li><Link to="/research" className={linkClass('/research')}>Research</Link></li>
-          <li><Link to="/contact" className={linkClass('/contact')}>Support</Link></li>
+          <li><Link to="/contact" className={linkClass('/contact')}>Contact Us</Link></li>
         </ul>
 
         {/* 🔷 RIGHT SIDE */}
@@ -83,25 +83,22 @@ const Navbar = () => {
           {/* 🌙 Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-blue-500 transition-all shadow-sm"
+            className="text-xl hover:scale-110 transition-transform"
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
 
           {!user ? (
-            <div className="flex items-center gap-4">
-              <Link to="/login" className="text-[0.65rem] font-black uppercase tracking-widest text-[#0ea5e9] border border-[#0ea5e9]/20 px-6 py-2.5 rounded-2xl hover:bg-[#0ea5e9]/5 transition-all">
-                Login
+            <div className="flex items-center gap-6 ml-2">
+              <Link to="/login" className="text-sm font-bold text-slate-900 dark:text-white hover:opacity-70 transition-opacity">
+                Log In
               </Link>
 
               <Link
                 to="/register"
-                className="px-8 py-3 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest text-white shadow-xl shadow-blue-500/20 transition-all active:scale-95"
-                style={{
-                  background: 'linear-gradient(135deg, #0284c7, #0ea5e9)',
-                }}
+                className="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-slate-950 dark:bg-slate-800 hover:bg-slate-800 transition-all active:scale-95 shadow-md"
               >
-                Join Now
+                Get Started
               </Link>
             </div>
           ) : (

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { softDeletePlugin } from "../utils/mongoosePlugins.js";
 
 const schema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -7,15 +8,17 @@ const schema = new mongoose.Schema({
   password: { type: String, required: true },
   role: {
     type: String,
-    enum: ["admin","doctor","patient","hospital","researcher","student"],
+    enum: ["admin", "doctor", "patient", "hospital", "researcher", "student"],
     default: "patient"
   },
   isActive: { type: Boolean, default: true },
   gender: { type: String, enum: ["Male", "Female", "Other"] },
-  dob: { type: Date }
+  dob: { type: Date },
+  avatar: { type: String },
+  bio: { type: String },
+  specialization: { type: String }
 }, { timestamps: true });
 
-import { softDeletePlugin } from "../utils/mongoosePlugins.js";
 schema.plugin(softDeletePlugin);
 
 export default mongoose.model("User", schema);

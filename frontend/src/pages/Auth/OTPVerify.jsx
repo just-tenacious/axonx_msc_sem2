@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const OTPVerify = () => {
     const navigate = useNavigate();
-    const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    const [otp, setOtp] = useState(['', '', '', '']);
     const [timeLeft, setTimeLeft] = useState(60); // 60 second timer
     const inputRefs = useRef([]);
 
@@ -25,7 +25,7 @@ const OTPVerify = () => {
         newOtp[index] = value.substring(value.length - 1);
         setOtp(newOtp);
 
-        if (value && index < 5) {
+        if (value && index < 3) {
             inputRefs.current[index + 1].focus();
         }
     };
@@ -38,8 +38,8 @@ const OTPVerify = () => {
 
     const handleVerify = () => {
         const code = otp.join('');
-        if (code.length < 6) {
-            toast.error("Please enter the full 6-digit code");
+        if (code.length < 4) {
+            toast.error("Please enter the full 4-digit code");
             return;
         }
         if (timeLeft === 0) {
@@ -68,7 +68,7 @@ const OTPVerify = () => {
                             ref={el => inputRefs.current[i] = el}
                             type="text" 
                             maxLength="1" 
-                            className="pro-input !p-0 w-12 h-14 text-center text-xl font-black focus:scale-110 focus:border-[#0ea5e9] transition-all" 
+                            className="pro-input !p-0 w-12 h-14 text-center text-xl font-black focus:scale-110 focus:border-[#0ea5e9] transition-all text-slate-900 dark:text-white" 
                             value={data}
                             onChange={(e) => handleChange(i, e.target.value)}
                             onKeyDown={(e) => handleKeyDown(i, e)}

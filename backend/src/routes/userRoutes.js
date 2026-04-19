@@ -7,6 +7,7 @@ router.post("/login", userController.login);
 router.post("/register", userController.register);
 
 router.get("/", userController.getAll);
+router.get("/hospitals/by-subdept/:subDeptId", userController.getHospitalsBySubDept);
 router.get("/:id", userController.getById);
 router.get("/:id/profile", userController.getUserWithProfile);
 router.post("/", userController.create);

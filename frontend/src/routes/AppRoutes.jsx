@@ -11,7 +11,7 @@ import ResetPassword from '../pages/Auth/ResetPassword';
 import Departments from '../pages/Departments';
 import Events from '../pages/Events';
 import Research from '../pages/Research';
-import Contact from '../pages/Admin/Support'; // Placeholder for public contact
+import Contact from '../pages/Contact'; // Public high-fidelity contact node
 
 // Layouts
 import AdminLayout from '../layouts/AdminLayout';

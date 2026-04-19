@@ -1,16 +1,36 @@
-import mongoose from "mongoose";
-import { softDeletePlugin } from "../utils/mongoosePlugins.js";
+import mongoose from 'mongoose';
 
-const schema = new mongoose.Schema({
-  email: { type: String, required: true },
-  subject: { type: String, required: true },
-  status: {
-    type: String,
-    enum: ["Pending","Resolved"],
-    default: "Pending"
-  }
-}, { timestamps: true });
+const contactQuerySchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    subject: {
+        type: String,
+        required: true
+    },
+    message: {
+        type: String,
+        required: true
+    },
+    response: {
+        type: String,
+        default: ''
+    },
+    status: {
+        type: String,
+        enum: ['Pending', 'Responded'],
+        default: 'Pending'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
 
-schema.plugin(softDeletePlugin);
-
-export default mongoose.model("ContactQuery", schema);
+const ContactQuery = mongoose.model('ContactQuery', contactQuerySchema);
+export default ContactQuery;

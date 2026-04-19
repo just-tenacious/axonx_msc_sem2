@@ -6,12 +6,17 @@ import subDeptController from "../controllers/subDeptController.js";
 import appointmentController from "../controllers/appointmentController.js";
 import messageController from "../controllers/messageController.js";
 import researchController from "../controllers/researchController.js";
+import * as contactController from "../controllers/contactController.js";
+import eventRoutes from "./eventRoutes.js";
+import chatRoutes from "./chatRoutes.js";
 
 const router = express.Router();
 
 // Modular Routes
 router.use("/users", userRoutes);
 router.use("/availability", availabilityRoutes);
+router.use("/events", eventRoutes);
+router.use("/chats", chatRoutes);
 
 // ── Department Routes (custom controller with block/revoke + subdept count) ──
 router.get("/departments",             departmentController.getAll);
@@ -44,5 +49,10 @@ mapBasicRoutes("/appointments", appointmentController);
 mapBasicRoutes("/messages", messageController);
 mapBasicRoutes("/research-papers", researchController);
 router.patch("/research-papers/:id/status", researchController.updateNodalStatus);
+
+// ── Support/Contact Routes ──
+router.get("/support/queries",    contactController.getAllQueries);
+router.post("/support/queries",   contactController.createQuery);
+router.patch("/support/queries/:id", contactController.updateQueryStatus);
 
 export default router;

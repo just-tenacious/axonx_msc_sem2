@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import { loginUser } from '../../utils/api';
 import toast from 'react-hot-toast';
+import { Mail, Lock, ClipboardCheck } from 'lucide-react';
+import ThemeToggle from '../../components/ThemeToggle';
+import Logo from '../../components/Logo';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login, user } = useAuth();
 
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [credentials, setCredentials] = useState({ identifier: '', password: '' });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
@@ -19,22 +22,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // ✅ Connect to our local clinical node
-      const { data: users } = await axios.get(`http://localhost:5000/api/users?email=${credentials.email}`);
-      
-      if (users.length === 0) {
-        toast.error('Identity not found in clinical database');
-        setLoading(false);
-        return;
-      }
+      const response = await loginUser({ 
+          identifier: credentials.identifier, 
+          password: credentials.password 
+      });
 
-      const foundUser = users[0];
-
-      if (foundUser.password !== credentials.password) {
-        toast.error('Invalid security credentials');
-        setLoading(false);
-        return;
-      }
+      const foundUser = response.data.data;
 
       if (foundUser.isActive === false) {
         toast.error('Account is currently de-activated');
@@ -45,9 +38,9 @@ const Login = () => {
       // ✅ Authenticate and synchronize session
       login(foundUser);
       toast.success(`Welcome back, ${foundUser.name}`);
-      
+
     } catch (err) {
-      toast.error('Connection to security node failed');
+      toast.error(err.response?.data?.error || 'Connection to security node failed');
       setLoading(false);
     }
   };
@@ -62,80 +55,80 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  const inputStyle = {
-    width: '100%',
-    backgroundColor: 'rgba(248,250,252,0.8)',
-    borderRadius: '1.25rem',
-    padding: '1.25rem 1.5rem',
-    border: '1px solid rgba(203,213,225,0.8)',
-    outline: 'none',
-    fontSize: '0.9rem',
-    boxSizing: 'border-box',
-    fontWeight: '700'
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1121] flex items-center justify-center p-8 animate-in fade-in duration-700">
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-500/10 to-transparent pointer-events-none"></div>
-      
-      <div className="w-full max-w-[32rem] bg-white/90 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200 dark:border-slate-800 rounded-[48px] p-16 shadow-2xl relative z-10 text-center">
-        
-        <div style={{
-          fontSize: '3.5rem',
-          background: 'linear-gradient(135deg, #38bdf8, #34d399)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '2rem'
-        }} className="font-black italic drop-shadow-sm">⬡</div>
+    <div className="min-h-screen pt-24 pb-8 flex items-center justify-center bg-[var(--bg-color)] px-8 transition-colors duration-500">
+      <ThemeToggle />
 
-        <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter uppercase">
-          Portal Login
-        </h2>
-        <p className="text-sm font-bold text-slate-400 dark:text-slate-500 mb-12 italic">Execute identity handshake to access the AxonX network.</p>
+      <div className="pro-card w-full max-w-[500px] p-10 text-center animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="flex justify-center mb-6">
+          <Logo className="h-14" />
+        </div>
 
-        <form onSubmit={handleLogin} className="space-y-6 flex flex-col text-left">
-          <div className="space-y-2">
-            <label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-4">Command Email</label>
-            <input
-              type="email"
-              name="email"
-              value={credentials.email}
-              onChange={handleChange}
-              placeholder="e.g. operator@axonx.medical"
-              style={inputStyle}
-              className="dark:text-white"
-              required
-            />
+        <h1 className="text-2xl font-black text-[var(--text-main)] mb-1">Sign In</h1>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="space-y-1.5 text-left">
+            <label className="text-[0.65rem] font-black text-[var(--text-muted)] uppercase ml-2 flex items-center gap-1">
+              <Mail size={10} /> Email / Username
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary-accent)] z-10 transition-colors">
+                <Mail size={16} />
+              </div>
+              <input
+                type="text"
+                name="identifier"
+                value={credentials.identifier}
+                onChange={handleChange}
+                placeholder="e.g. username or email"
+                className="pro-input w-full pl-10"
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-4">Credential Key</label>
-            <input
-              type="password"
-              name="password"
-              value={credentials.password}
-              onChange={handleChange}
-              placeholder="••••••••••••"
-              style={inputStyle}
-              className="dark:text-white"
-              required
-            />
+          <div className="space-y-1.5 text-left">
+            <label className="text-[0.65rem] font-black text-[var(--text-muted)] uppercase ml-2 flex items-center gap-1">
+              <Lock size={10} /> Password
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary-accent)] z-10 transition-colors">
+                <Lock size={16} />
+              </div>
+              <input
+                type="password"
+                name="password"
+                value={credentials.password}
+                onChange={handleChange}
+                placeholder="••••••••••••"
+                className="pro-input w-full pl-10"
+                required
+              />
+            </div>
+            <div className="text-right mt-1">
+              <Link to="/forgot-password" className="text-sm font-black text-[var(--primary-accent)] hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-8 py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-[24px] uppercase tracking-widest text-[0.7rem] shadow-xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50"
-          >
-            {loading ? 'Verifying...' : 'Synchronize Identity'}
-          </button>
+          <div className="pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="pro-hover-lift w-full py-3.5 rounded-xl bg-gradient-to-r from-[#0ea5e9] to-[#1e40af] text-white font-black text-md shadow-lg shadow-blue-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? 'Verifying...' : <><ClipboardCheck size={20} /> Sign In</>}
+            </button>
+          </div>
         </form>
 
-        <div className="mt-12 text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">
-          New Node?{' '}
-          <Link to="/register" className="text-blue-500 hover:underline">
-            Request Access
-          </Link>
+        <div className="mt-8 pt-6 border-t border-[var(--border-color-light)]">
+          <p className="text-[var(--text-muted)] text-sm font-bold">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-[var(--primary-accent)] hover:underline font-black ml-1 uppercase tracking-tighter">
+              Register
+            </Link>
+          </p>
         </div>
       </div>
     </div>
