@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Modern Theme */
+    --bg-color: #f4f7fe;
+    --sidebar-bg: #1e3a8a;
+    /* Deep elegant Navy Blue */
+    --sidebar-text: #e0f2fe;
+    --sidebar-active-bg: #1e40af;
+    --sidebar-active-text: #ffffff;
+    --topbar-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --border-color-light: #f1f5f9;
+    --hover-bg: #f8fafc;
+    --card-shadow: 0px 4px 24px -1px rgba(0, 0, 0, 0.04);
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --primary-accent: #0ea5e9;
+    --primary-accent-hover: #0284c7;
+}
+
+[data-theme='dark'] {
+    /* Dark Modern Theme */
+    --bg-color: #0b1121;
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #cbd5e1;
+    --sidebar-active-bg: #1e293b;
+    --sidebar-active-text: #ffffff;
+    --topbar-bg: #1e293b;
+    --text-main: #e2e8f0;
+    /* Softer white for less eye strain */
+    --text-muted: #94a3b8;
+    --border-color: #2d3b4e;
+    /* Softer border */
+    --border-color-light: #1e293b;
+    --hover-bg: #223044;
+    /* Extremely subtle, light hover tint */
+    --card-shadow: 0px 8px 32px 0px rgba(0, 0, 0, 0.25);
+    --glass-bg: rgba(30, 41, 59, 0.85);
+    --primary-accent: #38bdf8;
+    --primary-accent-hover: #0ea5e9;
+}
+
+/* Global Dark Mode Overrides for Bootstrap/Common classes */
+[data-theme='dark'] .bg-white {
+    background-color: var(--topbar-bg) !important;
+}
+
+[data-theme='dark'] .bg-light {
+    background-color: var(--bg-color) !important;
+}
+
+[data-theme='dark'] .text-dark {
+    color: var(--text-main) !important;
+}
+
+[data-theme='dark'] .border,
+[data-theme='dark'] .border-top,
+[data-theme='dark'] .border-bottom,
+[data-theme='dark'] .border-start,
+[data-theme='dark'] .border-end {
+    border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme='dark'] .shadow {
+    box-shadow: var(--card-shadow) !important;
+}
+
+[data-theme='dark'] .modal-content {
+    background-color: var(--topbar-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme='dark'] .dropdown-menu {
+    background-color: var(--topbar-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .dropdown-item {
+    color: var(--text-main);
+}
+
+[data-theme='dark'] .dropdown-item:hover {
+    background-color: var(--hover-bg);
+    color: var(--primary-accent);
+}
+
+[data-theme='dark'] select option {
+    background-color: var(--topbar-bg) !important;
+    color: var(--text-main) !important;
+}
+
+[data-theme='dark'] .pro-input {
+    background-color: var(--bg-color) !important;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Base custom classes to be globally used natively across App */
+.pro-card {
+    background-color: var(--topbar-bg) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 16px !important;
+    box-shadow: var(--card-shadow) !important;
+    transition: all 0.3s ease;
+}
+
+.pro-hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0px 14px 28px -4px rgba(0, 0, 0, 0.08) !important;
+    border-color: var(--primary-accent) !important;
+}
+
+[data-theme='dark'] .pro-hover-lift:hover {
+    box-shadow: 0px 14px 28px -4px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Soft Input fields */
+.pro-input {
+    background-color: var(--bg-color) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 10px !important;
+    transition: all 0.2s;
+    padding: 10px 16px !important;
+}
+
+.pro-input::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+}
+
+.pro-input:focus {
+    border-color: var(--primary-accent) !important;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15) !important;
+    outline: none;
+}
+
+/* Global Generic Utilities Override */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Table global styling overrides */
+.table-pro {
+    --bs-table-bg: transparent !important;
+}
+
+.table-pro th {
+    background-color: var(--bg-color) !important;
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border-color) !important;
+    border-top: none !important;
+    padding: 16px 24px !important;
+}
+
+.table-pro td {
+    padding: 18px 24px !important;
+    border-bottom: 1px solid var(--border-color-light) !important;
+    border-top: none !important;
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.table-pro tbody tr {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.table-pro tbody tr:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+/* Beautiful Role Badges */
+.pro-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    display: inline-block;
+}
+
+.badge-role-patient {
+    background-color: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.badge-role-doctor {
+    background-color: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+.badge-role-student {
+    background-color: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+    border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.badge-role-academic {
+    background-color: rgba(20, 184, 166, 0.1);
+    color: #14b8a6;
+    border: 1px solid rgba(20, 184, 166, 0.2);
+}
+
+.badge-role-hospital {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+[data-theme='dark'] .badge-role-patient {
+    color: #fdba74;
+}
+
+[data-theme='dark'] .badge-role-doctor {
+    color: #7dd3fc;
+}
+
+[data-theme='dark'] .badge-role-student {
+    color: #d8b4fe;
+}
+
+[data-theme='dark'] .badge-role-academic {
+    color: #5eead4;
+}
+
+[data-theme='dark'] .badge-role-hospital {
+    color: #fca5a5;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted);
+}
