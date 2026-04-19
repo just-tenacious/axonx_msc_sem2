@@ -14,18 +14,16 @@ export const softDeletePlugin = (schema) => {
     });
 
     // Middlewares to filter out deleted records
-    schema.pre(/^find/, function (next) {
+    schema.pre(/^find/, function () {
         // If 'includeDeleted' is set, we don't apply the filter
         if (!this.getOptions().includeDeleted) {
             this.where({ isDeleted: false });
         }
-        next();
     });
 
-    schema.pre('aggregate', function (next) {
+    schema.pre('aggregate', function () {
         // Exclude deleted records from aggregation pipelines
         this.pipeline().unshift({ $match: { isDeleted: false } });
-        next();
     });
 
     // Add a soft delete method to the schema

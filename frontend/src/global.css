@@ -1,9 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-* {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    background-color: #f0f0f0 !important; /* DEBUG: Light gray instead of red to be less intrusive */
 }
 
 :root {
@@ -139,9 +144,9 @@ body {
     background-color: var(--bg-color) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
-    border-radius: 10px !important;
-    transition: all 0.2s;
-    padding: 10px 16px !important;
+    border-radius: 12px !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 14px 16px 14px 56px !important; /* Premium left padding for icons */
 }
 
 .pro-input::placeholder {
@@ -221,7 +226,7 @@ body {
     border: 1px solid rgba(168, 85, 247, 0.2);
 }
 
-.badge-role-academic {
+.badge-role-academic, .badge-role-researcher {
     background-color: rgba(20, 184, 166, 0.1);
     color: #14b8a6;
     border: 1px solid rgba(20, 184, 166, 0.2);

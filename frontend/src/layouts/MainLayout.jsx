@@ -8,7 +8,7 @@ const MainLayout = ({ children, role }) => {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-color)' }}>
             <ThemeToggle />
-            
+
             {/* Sidebar Placeholder */}
             <aside style={{
                 width: '260px',
@@ -21,14 +21,14 @@ const MainLayout = ({ children, role }) => {
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '40px', color: 'white' }}>
                     AxonX <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>{role.toUpperCase()}</span>
                 </div>
-                
+
                 <nav style={{ flexGrow: 1 }}>
                     <div style={{ marginBottom: '10px', padding: '10px', borderRadius: '8px', backgroundColor: 'var(--sidebar-active-bg)', color: 'var(--sidebar-active-text)' }}>
                         Dashboard
                     </div>
                 </nav>
 
-                <button 
+                <button
                     onClick={() => navigate('/login')}
                     style={{
                         padding: '12px',

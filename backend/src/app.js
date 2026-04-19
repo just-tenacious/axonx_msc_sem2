@@ -17,6 +17,11 @@ app.use((req, res, next) => {
 // API ROUTES
 app.use("/api", apiRoutes);
 
+// DEBUG ROUTE
+app.get("/api/test-direct", (req, res) => {
+  res.json({ message: "Direct API route is working" });
+});
+
 // TEST ROUTE
 app.get("/", (req, res) => {
   res.send("🔥 AxonX API is running...");
