@@ -3,7 +3,7 @@ import {
     Users as UsersIcon, GraduationCap, BookOpenText, Heart, Activity, 
     Building2, ChevronRight, ArrowLeft, Plus,
     Eye, ShieldAlert, Filter, Download as DownloadIcon, Check, X, 
-    ChevronLeft, User, Mail, Lock, CheckCircle, Search
+    ChevronLeft, User, Mail, Lock, CheckCircle, Search, Edit2, Calendar
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -25,10 +25,14 @@ const Users = () => {
 
     const [showAddModal, setShowAddModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [formData, setFormData] = useState({
         name: '', username: '', email: '', password: '', 
         confirmPassword: '', role: 'patient', gender: '', dob: ''
+    });
+    const [editForm, setEditForm] = useState({
+        name: '', username: '', email: '', gender: '', dob: '', role: 'patient'
     });
 
     const roleCards = [
@@ -116,6 +120,32 @@ const Users = () => {
         }
     };
 
+    const openEditModal = (user) => {
+        setCurrentUser(user);
+        setEditForm({
+            name: user.name || '',
+            username: user.username || '',
+            email: user.email || '',
+            gender: user.gender || '',
+            dob: user.dob ? user.dob.substring(0, 10) : '',
+            role: user.role || 'patient'
+        });
+        setShowEditModal(true);
+    };
+
+    const handleEditUser = async (e) => {
+        e.preventDefault();
+        try {
+            const loader = toast.loading("Updating user…");
+            await axios.put(`http://localhost:5000/api/users/${currentUser._id}`, editForm);
+            toast.success("User updated!", { id: loader });
+            setShowEditModal(false);
+            fetchUsers();
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Update failed");
+        }
+    };
+
     const exportToExcel = () => {
         const h = ["Sr No","Name","Username","Email","Role","Gender","Status"];
         const r = users.map((u,i) => [i+1, u.name, u.username, u.email, u.role, u.gender, u.isActive ? 'Active' : 'Blocked']);
@@ -147,6 +177,82 @@ const Users = () => {
     // ── shared modals (always in DOM) ───────────────────────────────────────────
     const Modals = (
         <>
+            {/* EDIT USER MODAL */}
+            {showEditModal && currentUser && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-sm bg-black/50">
+                    <div className="pro-card w-full max-w-2xl p-10 shadow-2xl overflow-y-auto max-h-[90vh] bg-white dark:bg-[#1e293b] animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h2 className="text-2xl font-black text-[var(--text-main)]">Edit User</h2>
+                                <p className="text-[0.62rem] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-0.5">{currentUser.email}</p>
+                            </div>
+                            <button onClick={() => setShowEditModal(false)} className="p-3 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition-all"><X size={20} /></button>
+                        </div>
+
+                        <form onSubmit={handleEditUser} className="space-y-5">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[0.6rem] font-black text-[var(--text-muted)] uppercase ml-1">Full Name</label>
+                                    <div className="relative group">
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-blue-500 transition-colors z-10" size={18} />
+                                        <input required type="text" placeholder="Full Name" className="pro-input w-full pl-12 h-13" value={editForm.name} onChange={e => setEditForm(f => ({...f, name: e.target.value}))} />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[0.6rem] font-black text-[var(--text-muted)] uppercase ml-1">Username</label>
+                                    <div className="relative group">
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-blue-500 transition-colors z-10" size={18} />
+                                        <input required type="text" placeholder="username" className="pro-input w-full pl-12 h-13" value={editForm.username} onChange={e => setEditForm(f => ({...f, username: e.target.value}))} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[0.6rem] font-black text-[var(--text-muted)] uppercase ml-1">Email</label>
+                                <div className="relative group">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-blue-500 transition-colors z-10" size={18} />
+                                    <input required type="email" placeholder="email@axonx.com" className="pro-input w-full pl-12 h-13" value={editForm.email} onChange={e => setEditForm(f => ({...f, email: e.target.value}))} />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[0.6rem] font-black text-[var(--text-muted)] uppercase ml-1">Gender</label>
+                                    <select className="pro-input w-full h-13 pl-4" value={editForm.gender} onChange={e => setEditForm(f => ({...f, gender: e.target.value}))}>
+                                        <option value="">Select</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[0.6rem] font-black text-[var(--text-muted)] uppercase ml-1">Date of Birth</label>
+                                    <div className="relative group">
+                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-blue-500 transition-colors z-10" size={16} />
+                                        <input type="date" className="pro-input w-full h-13 pl-11" value={editForm.dob} onChange={e => setEditForm(f => ({...f, dob: e.target.value}))} />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[0.6rem] font-black text-[var(--text-muted)] uppercase ml-1">Role</label>
+                                    <select className="pro-input w-full h-13 pl-4" value={editForm.role} onChange={e => setEditForm(f => ({...f, role: e.target.value}))}>
+                                        <option value="patient">Patient</option>
+                                        <option value="doctor">Doctor</option>
+                                        <option value="hospital">Hospital</option>
+                                        <option value="student">Student</option>
+                                        <option value="researcher">Researcher</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 py-4 bg-[var(--bg-color)] border border-[var(--border-color)] text-[var(--text-main)] font-black rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">Cancel</button>
+                                <button type="submit" className="flex-1 py-4 bg-gradient-to-r from-[#0ea5e9] to-[#1e40af] text-white font-black rounded-2xl shadow-lg shadow-blue-500/30 active:scale-95 transition-all">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {/* ADD USER MODAL */}
             {showAddModal && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-sm bg-black/50">
@@ -265,10 +371,13 @@ const Users = () => {
                             </div>
 
                             {/* Actions */}
-                            <div className="flex gap-3 pt-2">
-                                <button onClick={() => setShowDetailModal(false)} className="flex-1 py-3.5 bg-[var(--bg-color)] border border-[var(--border-color)] text-[var(--text-main)] font-black rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">Close</button>
+                            <div className="flex gap-2 pt-2">
+                                <button onClick={() => setShowDetailModal(false)} className="flex-1 py-3.5 bg-[var(--bg-color)] border border-[var(--border-color)] text-[var(--text-main)] font-black rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">Close</button>
+                                <button onClick={() => { setShowDetailModal(false); openEditModal(currentUser); }} className="flex-1 py-3.5 bg-blue-500 text-white font-black rounded-2xl hover:bg-blue-600 active:scale-95 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
+                                    <Edit2 size={14} /> Edit
+                                </button>
                                 <button onClick={() => handleToggleStatus(currentUser)} className={`flex-1 py-3.5 font-black rounded-2xl transition-all active:scale-95 ${currentUser.isActive ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}>
-                                    {currentUser.isActive ? 'Block Access' : 'Restore Access'}
+                                    {currentUser.isActive ? 'Block' : 'Restore'}
                                 </button>
                             </div>
                         </div>
@@ -405,6 +514,11 @@ const Users = () => {
                                                 className="p-2.5 text-blue-500 bg-blue-50 rounded-xl hover:scale-110 active:scale-95 transition-all"
                                                 title="View"
                                             ><Eye size={16} /></button>
+                                            <button
+                                                onClick={() => openEditModal(user)}
+                                                className="p-2.5 text-indigo-500 bg-indigo-50 rounded-xl hover:scale-110 active:scale-95 transition-all"
+                                                title="Edit"
+                                            ><Edit2 size={16} /></button>
                                             <button
                                                 onClick={() => handleToggleStatus(user)}
                                                 className={`p-2.5 rounded-xl hover:scale-110 active:scale-95 transition-all ${user.isActive ? 'text-red-500 bg-red-50' : 'text-green-500 bg-green-50'}`}
