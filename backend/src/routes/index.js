@@ -1,7 +1,5 @@
 import express from "express";
 import userRoutes from "./userRoutes.js";
-import hospitalRoutes from "./hospitalRoutes.js";
-import researchRoutes from "./researchRoutes.js";
 import availabilityRoutes from "./availabilityRoutes.js";
 import departmentController from "../controllers/departmentController.js";
 import subDeptController from "../controllers/subDeptController.js";
@@ -12,8 +10,6 @@ const router = express.Router();
 
 // Modular Routes
 router.use("/users", userRoutes);
-router.use("/hospitals", hospitalRoutes);
-router.use("/research", researchRoutes);
 router.use("/availability", availabilityRoutes);
 
 // ── Department Routes (custom controller with block/revoke + subdept count) ──
@@ -42,6 +38,7 @@ router.put("/sub-departments/:id",          subDeptController.update);
 router.delete("/sub-departments/:id",       subDeptController.delete);
 router.patch("/sub-departments/:id/block",  subDeptController.block);
 router.patch("/sub-departments/:id/revoke", subDeptController.revoke);
+router.get("/appointments/stats", appointmentController.getStats);
 mapBasicRoutes("/appointments", appointmentController);
 mapBasicRoutes("/messages", messageController);
 
