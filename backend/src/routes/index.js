@@ -5,6 +5,7 @@ import departmentController from "../controllers/departmentController.js";
 import subDeptController from "../controllers/subDeptController.js";
 import appointmentController from "../controllers/appointmentController.js";
 import messageController from "../controllers/messageController.js";
+import researchController from "../controllers/researchController.js";
 
 const router = express.Router();
 
@@ -41,5 +42,7 @@ router.patch("/sub-departments/:id/revoke", subDeptController.revoke);
 router.get("/appointments/stats", appointmentController.getStats);
 mapBasicRoutes("/appointments", appointmentController);
 mapBasicRoutes("/messages", messageController);
+mapBasicRoutes("/research-papers", researchController);
+router.patch("/research-papers/:id/status", researchController.updateNodalStatus);
 
 export default router;

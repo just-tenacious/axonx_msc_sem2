@@ -54,6 +54,8 @@ const AdminLayout = () => {
         { name: 'Support', icon: LifeBuoy, path: '/admin/support' },
         { name: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
         { name: 'Profile', icon: UserCircle, path: '/admin/profile' },
+        { name: 'Site Login', icon: LogOut, path: '/login' },
+        { name: 'Site Register', icon: UserCircle, path: '/register' },
     ];
 
     const handleLogout = () => {

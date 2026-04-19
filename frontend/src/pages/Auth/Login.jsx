@@ -1,147 +1,145 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ThemeToggle from '../../components/ThemeToggle';
-import Logo from '../../components/Logo';
-import { loginUser } from '../../utils/api';
-import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, LogIn } from 'lucide-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const Login = () => {
-    const navigate = useNavigate();
-    const { login } = useAuth();
-    const [formData, setFormData] = useState({
-        identifier: '', 
-        password: ''
-    });
-    const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login, user } = useAuth();
 
-    useEffect(() => {
-        document.title = "Sign In | AxonX Healthcare";
-    }, []);
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const handleChange = (e) =>
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
 
-    const validate = () => {
-        if (!formData.identifier.trim()) {
-            toast.error("Please enter email or username");
-            return false;
-        }
-        if (!formData.password) {
-            toast.error("Please enter password");
-            return false;
-        }
-        return true;
-    };
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validate()) return;
+    try {
+      // ✅ Connect to our local clinical node
+      const { data: users } = await axios.get(`http://localhost:5000/api/users?email=${credentials.email}`);
+      
+      if (users.length === 0) {
+        toast.error('Identity not found in clinical database');
+        setLoading(false);
+        return;
+      }
 
-        setLoading(true);
-        const loadingToast = toast.loading("Checking credentials...");
+      const foundUser = users[0];
+
+      if (foundUser.password !== credentials.password) {
+        toast.error('Invalid security credentials');
+        setLoading(false);
+        return;
+      }
+
+      if (foundUser.isActive === false) {
+        toast.error('Account is currently de-activated');
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Authenticate and synchronize session
+      login(foundUser);
+      toast.success(`Welcome back, ${foundUser.name}`);
+      
+    } catch (err) {
+      toast.error('Connection to security node failed');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate(`/dashboard/${user.role}`);
+      }
+    }
+  }, [user, navigate]);
+
+  const inputStyle = {
+    width: '100%',
+    backgroundColor: 'rgba(248,250,252,0.8)',
+    borderRadius: '1.25rem',
+    padding: '1.25rem 1.5rem',
+    border: '1px solid rgba(203,213,225,0.8)',
+    outline: 'none',
+    fontSize: '0.9rem',
+    boxSizing: 'border-box',
+    fontWeight: '700'
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1121] flex items-center justify-center p-8 animate-in fade-in duration-700">
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-500/10 to-transparent pointer-events-none"></div>
+      
+      <div className="w-full max-w-[32rem] bg-white/90 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200 dark:border-slate-800 rounded-[48px] p-16 shadow-2xl relative z-10 text-center">
         
-        try {
-            const response = await loginUser(formData);
-            if (response.data.success) {
-                const userData = response.data.data;
+        <div style={{
+          fontSize: '3.5rem',
+          background: 'linear-gradient(135deg, #38bdf8, #34d399)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '2rem'
+        }} className="font-black italic drop-shadow-sm">⬡</div>
 
-                // STATUS CHECK: Block suspended users
-                if (userData.isActive === false) {
-                    toast.error("Account Restricted", { id: loadingToast });
-                    navigate('/suspended');
-                    return;
-                }
+        <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter uppercase">
+          Portal Login
+        </h2>
+        <p className="text-sm font-bold text-slate-400 dark:text-slate-500 mb-12 italic">Execute identity handshake to access the AxonX network.</p>
 
-                login(userData);
-                toast.success(`Welcome back!`, { id: loadingToast });
-                
-                if (userData.role === 'admin') {
-                    navigate('/admin/dashboard');
-                } else {
-                    navigate(`/dashboard/${userData.role}`);
-                }
-            }
-        } catch (err) {
-            toast.error(err.response?.data?.error || 'Sign in failed. Invalid credentials.', { id: loadingToast });
-        } finally {
-            setLoading(false);
-        }
-    };
+        <form onSubmit={handleLogin} className="space-y-6 flex flex-col text-left">
+          <div className="space-y-2">
+            <label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-4">Command Email</label>
+            <input
+              type="email"
+              name="email"
+              value={credentials.email}
+              onChange={handleChange}
+              placeholder="e.g. operator@axonx.medical"
+              style={inputStyle}
+              className="dark:text-white"
+              required
+            />
+          </div>
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--bg-color)] p-5 transition-colors duration-500">
-            <ThemeToggle />
-            
-            <div className="pro-card w-full max-w-[450px] p-10 text-center animate-in fade-in zoom-in duration-500 overflow-hidden">
-                {/* Logo Section */}
-                <div className="mb-6 flex justify-center">
-                    <Logo className="h-16" />
-                </div>
+          <div className="space-y-2">
+            <label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-4">Credential Key</label>
+            <input
+              type="password"
+              name="password"
+              value={credentials.password}
+              onChange={handleChange}
+              placeholder="••••••••••••"
+              style={inputStyle}
+              className="dark:text-white"
+              required
+            />
+          </div>
 
-                <h1 className="text-2xl font-black text-[var(--text-main)] mb-1">Sign In</h1>
-                <p className="text-[var(--text-muted)] mb-8 font-bold text-sm">AxonX Healthcare System</p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-8 py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-[24px] uppercase tracking-widest text-[0.7rem] shadow-xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50"
+          >
+            {loading ? 'Verifying...' : 'Synchronize Identity'}
+          </button>
+        </form>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary-accent)] transition-colors z-10">
-                            <Mail size={18} />
-                        </div>
-                        <input 
-                            type="text"
-                            name="identifier"
-                            placeholder="Email or Username"
-                            className="pro-input w-full pl-12 relative z-0"
-                            value={formData.identifier}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <div className="relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary-accent)] transition-colors z-10">
-                                <Lock size={18} />
-                            </div>
-                            <input 
-                                type="password"
-                                name="password"
-                                placeholder="Password"
-                                className="pro-input w-full pl-12 relative z-0"
-                                value={formData.password}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="text-right">
-                            <Link to="/forgot-password" size="sm" className="text-[var(--primary-accent)] text-xs font-bold hover:underline">
-                                Forgot password?
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div className="pt-2">
-                        <button 
-                            type="submit"
-                            disabled={loading}
-                            className="pro-hover-lift w-full py-3.5 rounded-xl bg-gradient-to-r from-[#0ea5e9] to-[#1e40af] text-white font-black text-md shadow-lg shadow-blue-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
-                        >
-                            {loading ? 'Processing...' : <><LogIn size={18} /> Sign In</>}
-                        </button>
-                    </div>
-                </form>
-
-                <div className="mt-8 pt-6 border-t border-[var(--border-color-light)]">
-                    <p className="text-[var(--text-muted)] text-sm font-bold">
-                        New here? {' '}
-                        <Link to="/register" className="text-[var(--primary-accent)] hover:underline font-black ml-1 uppercase tracking-tighter">
-                            Create Account
-                        </Link>
-                    </p>
-                </div>
-            </div>
+        <div className="mt-12 text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">
+          New Node?{' '}
+          <Link to="/register" className="text-blue-500 hover:underline">
+            Request Access
+          </Link>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Login;
