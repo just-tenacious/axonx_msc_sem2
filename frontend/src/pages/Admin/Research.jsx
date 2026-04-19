@@ -84,8 +84,7 @@ const Research = () => {
             all: data.length,
             pending: data.filter(p => p.status === 'Pending').length,
             approved: data.filter(p => p.status === 'Approved').length,
-            suspended: data.filter(p => p.status === 'Suspended').length,
-            rejected: data.filter(p => p.status === 'Rejected').length
+            suspended: data.filter(p => p.status === 'Suspended' || p.status === 'Rejected').length 
         });
     };
 
@@ -110,6 +109,19 @@ const Research = () => {
         if (file) {
             toast.success(`${file.name} ready for secure transmission`);
             setNewPaper({...newPaper, pdfUrl: `/uploads/research/${file.name}`});
+        }
+    };
+
+    const handleViewDetail = async (paper) => {
+        setSelectedPaper(paper);
+        setView('detail');
+        try {
+            const { data } = await axios.get(`${BASE_URL}/research-papers/${paper._id}`);
+            if (data.success) {
+                setSelectedPaper(data.data);
+            }
+        } catch (error) {
+            console.error("Deep archival fetch failed");
         }
     };
 
@@ -163,28 +175,27 @@ const Research = () => {
             { id: 'Pending',      name: 'Review Pending', count: stats.pending,    icon: Clock,        bg: 'bg-amber-50 text-amber-600' },
             { id: 'Approved',     name: 'Approved',      count: stats.approved, icon: CheckCircle2, bg: 'bg-emerald-50 text-emerald-600' },
             { id: 'Suspended',    name: 'Suspended',     count: stats.suspended, icon: Ban,      bg: 'bg-rose-50 text-rose-600' },
-            { id: 'Rejected',     name: 'Rejected',      count: stats.rejected,  icon: XCircle,      bg: 'bg-slate-50 text-slate-600' },
         ];
 
         return (
-            <div className="space-y-12 animate-in fade-in duration-700 max-w-[1600px] mx-auto">
+            <div className="space-y-12 animate-in fade-in duration-700">
                 <div className="text-center space-y-4">
                     <h1 className="text-5xl font-black text-slate-950 dark:text-white tracking-tighter uppercase italic">Research <span className="text-blue-500 not-italic">Network</span></h1>
                     <div className="w-24 h-2 bg-blue-500 mx-auto rounded-full"></div>
                     <p className="text-slate-500 text-sm font-black uppercase tracking-[0.2em] opacity-60 italic">Advanced Archival Management & Nodal Oversight</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {cardConfig.map((card) => (
-                        <button key={card.id} onClick={() => handleStatClick(card.id)} className="group relative p-8 bg-white dark:bg-slate-900 rounded-[40px] border border-slate-200 dark:border-slate-800 shadow-[0_15px_40px_rgba(8,_112,_184,_0.05)] hover:shadow-[0_25px_60px_rgba(8,_112,_184,_0.12)] hover:-translate-y-1 transition-all text-left overflow-hidden min-h-[280px] flex flex-col justify-between">
-                             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-[48px] group-hover:bg-blue-500/10 transition-colors"></div>
-                             <div className="relative z-10 flex flex-col h-full justify-between gap-6">
-                                <div className={`p-5 rounded-[20px] ${card.bg} w-fit shadow-inner group-hover:rotate-6 transition-transform`}><card.icon size={28} /></div>
-                                <div className="space-y-1">
-                                    <h3 className="text-4xl font-black text-slate-950 dark:text-white tracking-tighter">{card.count}</h3>
-                                    <p className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest mt-1 italic">{card.name}</p>
+                        <button key={card.id} onClick={() => handleStatClick(card.id)} className="group relative p-12 bg-white dark:bg-slate-900 rounded-[56px] border border-slate-200 dark:border-slate-800 shadow-[0_20px_50px_rgba(8,_112,_184,_0.05)] hover:shadow-[0_40px_80px_rgba(8,_112,_184,_0.15)] hover:-translate-y-2 transition-all text-left overflow-hidden">
+                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[64px] group-hover:bg-blue-500/10 transition-colors"></div>
+                             <div className="relative z-10 space-y-8">
+                                <div className={`p-6 rounded-[24px] ${card.bg} w-fit shadow-inner group-hover:rotate-12 transition-transform`}><card.icon size={36} /></div>
+                                <div>
+                                    <h3 className="text-5xl font-black text-slate-950 dark:text-white tracking-tighter">{card.count}</h3>
+                                    <p className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mt-1">{card.name}</p>
                                 </div>
-                                <div className="pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center text-blue-500 font-black text-[0.55rem] uppercase tracking-widest group-hover:gap-2 transition-all">View All <ChevronRight size={14} /></div>
+                                <div className="pt-4 flex items-center text-blue-500 font-black text-[0.6rem] uppercase tracking-widest">View All <ChevronRight size={14} /></div>
                              </div>
                         </button>
                     ))}
@@ -274,8 +285,7 @@ const Research = () => {
             
             if (selectedStatus === 'Pending') return matchesSearch && p.status === 'Pending';
             if (selectedStatus === 'Approved') return matchesSearch && p.status === 'Approved';
-            if (selectedStatus === 'Suspended') return matchesSearch && p.status === 'Suspended';
-            if (selectedStatus === 'Rejected') return matchesSearch && p.status === 'Rejected';
+            if (selectedStatus === 'Suspended') return matchesSearch && (p.status === 'Suspended' || p.status === 'Rejected');
             return matchesSearch;
         });
 
@@ -355,7 +365,7 @@ const Research = () => {
                                             </div>
                                         </td>
                                         <td className="px-10 py-8 text-right">
-                                            <button onClick={() => { setSelectedPaper(p); setView('detail'); }} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-400 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                                            <button onClick={() => handleViewDetail(p)} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-400 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
                                                 <Eye size={18} />
                                             </button>
                                         </td>
@@ -411,63 +421,49 @@ const Research = () => {
                                     </p>
                                 </div>
 
-                                {/* Re-introduced Clinical Endorsements with Circular Icons */}
+                                {/* Modernized Likes Row (No Avatars as requested) */}
                                 <div className="bg-white dark:bg-slate-900 rounded-[40px] p-10 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all group">
-                                    <div className="flex justify-between items-center mb-8">
+                                    <div className="flex justify-between items-center">
                                         <h4 className="text-[0.7rem] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-2"><Heart size={16} className="text-rose-500" fill="currentColor" /> likes</h4>
                                         <button onClick={() => setShowLikersModal(true)} className="text-[0.7rem] font-black text-blue-500 uppercase tracking-widest hover:underline transition-all">{(p.likes || []).length} TOTAL • VIEW REGISTRY</button>
-                                    </div>
-                                    <div className="flex flex-wrap gap-4 max-h-[140px] overflow-y-auto pr-4 custom-scrollbar">
-                                        {(p.likes || []).length > 0 ? p.likes.slice(0, 15).map((like, i) => (
-                                            <div key={i} className="relative group/avatar cursor-pointer">
-                                                <div className="w-14 h-14 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-lg group-hover/avatar:scale-110 transition-all">
-                                                    <img src={like.userId?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=liker-${i}-${like.userId?._id}`} className="w-full h-full object-cover" alt="" title={like.userId?.name} />
-                                                </div>
-                                                <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
-                                            </div>
-                                        )) : (
-                                            <p className="text-sm font-bold text-slate-400 italic opacity-50 py-4">Waiting for validation...</p>
-                                        )}
                                     </div>
                                 </div>
                              </div>
                         </div>
 
-                        {/* Comments Panel - Restricted to Approved Manuscripts */}
-                        {p.status === 'Approved' && (
-                            <div className="space-y-6">
-                                <h4 className="text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-4 ml-6">
-                                    <MessageSquare size={18} className="text-blue-500" /> comments
-                                </h4>
-                                <div className="bg-white dark:bg-slate-900 rounded-[56px] border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden relative group">
-                                    <div className="h-[500px] overflow-y-auto p-12 space-y-8 scrollbar-thin scrollbar-thumb-blue-500/20 scrollbar-track-transparent">
-                                        {(p.comments || []).length > 0 ? p.comments.map((comment, i) => (
-                                            <div key={i} className="p-10 bg-slate-50 dark:bg-slate-800/50 rounded-[48px] border border-slate-100 dark:border-slate-800 flex gap-8">
-                                                <div className="w-14 h-14 rounded-2xl border-4 border-white dark:border-slate-900 overflow-hidden shrink-0 shadow-lg relative">
-                                                    <img src={comment.userId?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.userId?._id}`} alt="" />
-                                                    <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center text-white border-2 border-white"><Check size={10} /></div>
-                                                </div>
-                                                <div className="space-y-3 flex-1">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-4">
-                                                            <p className="text-sm font-black text-slate-950 dark:text-white uppercase tracking-tight">{comment.userId?.name || "Anonymous"}</p>
-                                                            <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[0.5rem] font-black rounded-lg uppercase tracking-widest italic">{comment.userId?.role || "Member"}</span>
-                                                        </div>
-                                                        <span className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                        {/* Comments Panel */}
+                        <div className="space-y-6">
+                             <h4 className="text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-4 ml-6">
+                                <MessageSquare size={18} className="text-blue-500" /> comments
+                             </h4>
+                             <div className="bg-white dark:bg-slate-900 rounded-[56px] border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden relative group">
+                                <div className="h-[500px] overflow-y-auto p-12 space-y-8 scrollbar-thin scrollbar-thumb-blue-500/20 scrollbar-track-transparent">
+                                    {(p.comments || []).length > 0 ? p.comments.map((comment, i) => (
+                                        <div key={i} className="p-10 bg-slate-50 dark:bg-slate-800/50 rounded-[48px] border border-slate-100 dark:border-slate-800 flex gap-8">
+                                            <div className="w-14 h-14 rounded-2xl border-4 border-white dark:border-slate-900 overflow-hidden shrink-0 shadow-lg relative">
+                                                <img src={comment.userId?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.userId?._id}`} alt="" />
+                                                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center text-white border-2 border-white"><Check size={10} /></div>
+                                            </div>
+                                            <div className="space-y-3 flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-4">
+                                                        <p className="text-sm font-black text-slate-950 dark:text-white uppercase tracking-tight">{comment.userId?.name || "Anonymous"}</p>
+                                                        <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[0.5rem] font-black rounded-lg uppercase tracking-widest italic">{comment.userId?.role || "Member"}</span>
                                                     </div>
-                                                    <p className="text-slate-600 dark:text-slate-300 font-bold italic opacity-90 text-md leading-relaxed">"{comment.content || comment.text}"</p>
+                                                    <span className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">{new Date(comment.createdAt).toLocaleDateString()}</span>
                                                 </div>
+                                                <p className="text-slate-600 dark:text-slate-300 font-bold italic opacity-90 text-md leading-relaxed">"{comment.content || comment.text}"</p>
                                             </div>
-                                        )) : (
-                                            <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-20">
-                                                <MessageSquare size={64} />
-                                                <p className="text-xl font-black uppercase tracking-[0.2em]">Zero Peer Disputes Recorded</p>
-                                            </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )) : (
+                                        <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-20">
+                                            <MessageSquare size={64} />
+                                            <p className="text-xl font-black uppercase tracking-[0.2em]">Zero Peer Disputes Recorded</p>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        )}
+                             </div>
+                        </div>
                     </div>
 
                     <aside className="space-y-10">
