@@ -1,4 +1,5 @@
 import BrowseHistory from "../models/BrowseHistory.js";
+import { emitEvent } from "../socket.js";
 
 /**
  * Log user activity artifact
@@ -23,6 +24,7 @@ export const logActivity = async (req, res) => {
     });
 
     await history.save();
+    emitEvent("new_activity", history);
     res.status(201).json({ success: true, data: history });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -37,8 +39,19 @@ export const getUserHistory = async (req, res) => {
     const { userId } = req.params;
     const history = await BrowseHistory.find({ userId })
       .sort({ viewedAt: -1 })
-      .limit(20); // Limit to recent 20 nodes
-    
+      .limit(20);
+    res.json({ success: true, data: history });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const getAllHistory = async (req, res) => {
+  try {
+    const history = await BrowseHistory.find()
+      .populate("userId", "name avatar role")
+      .sort({ viewedAt: -1 })
+      .limit(50);
     res.json({ success: true, data: history });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -47,5 +60,6 @@ export const getUserHistory = async (req, res) => {
 
 export default {
   logActivity,
-  getUserHistory
+  getUserHistory,
+  getAllHistory
 };

@@ -2,6 +2,7 @@ import Appointment from "../models/Appointment.js";
 import User from "../models/User.js";
 import { createBaseController } from "./baseController.js";
 import logger from "../utils/logger.js";
+import { emitEvent } from "../socket.js";
 
 const baseController = createBaseController(Appointment, "Appointment");
 
@@ -86,6 +87,7 @@ const appointmentController = {
             }
 
             const appointment = await Appointment.create(req.body);
+            emitEvent("appointment_created", appointment);
             res.status(201).json({ success: true, data: appointment });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
@@ -113,6 +115,7 @@ const appointmentController = {
             const appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!appointment) return res.status(404).json({ success: false, error: "Record not found" });
             
+            emitEvent("appointment_updated", appointment);
             res.status(200).json({ success: true, data: appointment });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });

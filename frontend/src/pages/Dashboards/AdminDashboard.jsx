@@ -1,128 +1,188 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Activity, Users, FileText, Calendar, Building, MessageSquare } from 'lucide-react';
+import {
+    Activity, Users, FileText, Calendar, Building, MessageSquare,
+    Zap, Clock, ShieldCheck, ArrowUpRight, TrendingUp, RefreshCcw,
+    User as UserIcon, MousePointer2, AlertCircle, Sparkles, CircleDot,
+    Stethoscope, GraduationCap, Heart, CheckCircle2, XCircle, Layers
+} from 'lucide-react';
+import { io } from 'socket.io-client';
+
+const BASE_URL = 'http://localhost:5000/api';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
-        users: 0,
+        totalUsers: 0,
+        patients: 0,
         doctors: 0,
-        appointments: 0,
-        research: 0,
-        events: 0,
-        queries: 0
+        students: 0,
+        researchers: 0,
+        totalAppointments: 0,
+        pendingAppointments: 0,
+        completedAppointments: 0,
+        totalResearch: 0,
+        totalEvents: 0,
+        activeEvents: 0,
+        totalQueries: 0,
+        pendingQueries: 0,
+        departments: 0
     });
     const [loading, setLoading] = useState(true);
+    const [socketConnected, setSocketConnected] = useState(false);
+    const socketRef = useRef(null);
 
     useEffect(() => {
-        const fetchDashboardStats = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
-                const requests = [
-                    axios.get('http://localhost:5000/api/users').catch(() => ({ data: { data: [] } })),
-                    axios.get('http://localhost:5000/api/appointments').catch(() => ({ data: { data: [] } })),
-                    axios.get('http://localhost:5000/api/research-papers').catch(() => ({ data: { data: [] } })),
-                    axios.get('http://localhost:5000/api/events').catch(() => ({ data: { data: [] } })),
-                    axios.get('http://localhost:5000/api/support/queries').catch(() => ({ data: { data: [] } }))
-                ];
-
-                const [resUsers, resApts, resRes, resEvts, resQu] = await Promise.all(requests);
+                const [resUsers, resApts, resRes, resEvts, resQu, resDepts] = await Promise.all([
+                    axios.get(`${BASE_URL}/users`).catch(() => ({ data: { data: [] } })),
+                    axios.get(`${BASE_URL}/appointments`).catch(() => ({ data: { data: [] } })),
+                    axios.get(`${BASE_URL}/research-papers`).catch(() => ({ data: { data: [] } })),
+                    axios.get(`${BASE_URL}/events`).catch(() => ({ data: { data: [] } })),
+                    axios.get(`${BASE_URL}/support/queries`).catch(() => ({ data: { data: [] } })),
+                    axios.get(`${BASE_URL}/departments`).catch(() => ({ data: { data: [] } }))
+                ]);
 
                 const usersData = resUsers.data?.data || [];
-                const doctorCount = usersData.filter(u => u.role?.toLowerCase() === 'doctor').length;
+                const aptsData = resApts.data?.data || [];
+                const evtsData = resEvts.data?.data || [];
+                const quData = resQu.data?.data || [];
 
                 setStats({
-                    users: usersData.length,
-                    doctors: doctorCount,
-                    appointments: resApts.data?.data?.length || 0,
-                    research: resRes.data?.data?.length || 0,
-                    events: resEvts.data?.data?.length || 0,
-                    queries: resQu.data?.data?.length || 0
+                    totalUsers: usersData.length,
+                    patients: usersData.filter(u => u.role === 'patient').length,
+                    doctors: usersData.filter(u => u.role === 'doctor').length,
+                    students: usersData.filter(u => u.role === 'student').length,
+                    researchers: usersData.filter(u => u.role === 'researcher' || u.role === 'academic').length,
+
+                    totalAppointments: aptsData.length,
+                    pendingAppointments: aptsData.filter(a => a.status === 'Pending').length,
+                    completedAppointments: aptsData.filter(a => a.status === 'Completed').length,
+
+                    totalResearch: resRes.data?.data?.length || 0,
+
+                    totalEvents: evtsData.length,
+                    activeEvents: evtsData.filter(e => e.status === 'Upcoming' || e.status === 'Ongoing').length,
+
+                    totalQueries: quData.length,
+                    pendingQueries: quData.filter(q => q.status === 'Pending').length,
+
+                    departments: resDepts.data?.data?.length || 0
                 });
+
             } catch (err) {
-                console.error("Dashboard Fetch Error:", err);
-                toast.error("Connectivity Issue: Please ensure backend server is running on port 5000", {
-                    duration: 5000,
-                    icon: '🚀'
-                });
+                toast.error("Connectivity Issue: Please ensure backend is active", { icon: '🚀' });
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchDashboardStats();
+        fetchData();
+
+        // Socket.io Initialization
+        socketRef.current = io('http://localhost:5000');
+
+        socketRef.current.on('connect', () => {
+            setSocketConnected(true);
+            toast.success("Real-time telemetry active", {
+                id: 'socket-conn',
+                duration: 2000,
+                style: { background: '#1e293b', color: '#fff', fontSize: '12px', fontWeight: 'bold' }
+            });
+        });
+
+        socketRef.current.on('disconnect', () => setSocketConnected(false));
+
+        socketRef.current.on('appointment_created', () => {
+            setStats(prev => ({
+                ...prev,
+                totalAppointments: prev.totalAppointments + 1,
+                pendingAppointments: prev.pendingAppointments + 1
+            }));
+        });
+
+        return () => {
+            if (socketRef.current) socketRef.current.disconnect();
+        };
     }, []);
 
     const cards = [
-        { label: 'Total Patients', val: stats.users - stats.doctors, icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
-        { label: 'Medical Staff', val: stats.doctors, icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-100' },
-        { label: 'Live Bookings', val: stats.appointments, icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-100' },
-        { label: 'Active Research', val: stats.research, icon: FileText, color: 'text-purple-600', bg: 'bg-purple-100' },
-        { label: 'Current Events', val: stats.events, icon: Building, color: 'text-sky-600', bg: 'bg-sky-100' },
-        { label: 'Support Tickets', val: stats.queries, icon: MessageSquare, color: 'text-rose-600', bg: 'bg-rose-100' }
+        // User Segments
+        { label: 'Total Patients', val: stats.patients, icon: Heart, color: 'text-rose-500', bg: 'bg-rose-50', trend: 'Global' },
+        { label: 'Medical Doctors', val: stats.doctors, icon: Stethoscope, color: 'text-blue-600', bg: 'bg-blue-50', trend: 'Verified' },
+        { label: 'Clinical Students', val: stats.students, icon: GraduationCap, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: 'Academic' },
+        { label: 'Researchers', val: stats.researchers, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: 'Scientific' },
+
+        // Operations
+        { label: 'Total Bookings', val: stats.totalAppointments, icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-50', trend: 'All Time' },
+        { label: 'Pending Slots', val: stats.pendingAppointments, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', trend: 'Action Req' },
+        { label: 'Research Assets', val: stats.totalResearch, icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50', trend: 'Published' },
+        { label: 'Active Events', val: stats.activeEvents, icon: Building, color: 'text-sky-600', bg: 'bg-sky-50', trend: 'Live Now' },
+
+        // Support & Departments
+        { label: 'Open Queries', val: stats.pendingQueries, icon: MessageSquare, color: 'text-red-600', bg: 'bg-red-50', trend: 'Urgent' },
+        { label: 'Department Nodes', val: stats.departments, icon: Layers, color: 'text-violet-600', bg: 'bg-violet-50', trend: 'Configured' },
+        { label: 'Total Queries', val: stats.totalQueries, icon: MessageSquare, color: 'text-slate-600', bg: 'bg-slate-50', trend: 'Managed' },
+        { label: 'Success Rate', val: stats.totalAppointments > 0 ? Math.round((stats.completedAppointments / stats.totalAppointments) * 100) + '%' : '100%', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-50', trend: 'Optimal' }
     ];
 
     if (loading) return (
-        <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest animate-pulse">Syncing Telemetry...</p>
         </div>
     );
 
     return (
-        <div className="flex flex-col gap-10 w-full animate-in fade-in duration-700">
-            {/* Hero Header */}
-            <div className="flex flex-col gap-2">
-                <h1 className="font-black text-4xl tracking-tight text-slate-900">
-                    Control Center Overview
-                </h1>
-                <p className="text-slate-500 font-medium">System-wide intelligence overview and clinical tracking.</p>
+        <div className="flex flex-col gap-10 w-full animate-in fade-in duration-700 pb-20 px-2">
+            {/* Real-time Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <h1 className="font-black text-5xl tracking-tight text-slate-900 dark:text-white uppercase italic">
+                            Command <span className="text-blue-600 not-italic">Center</span>
+                        </h1>
+                        <Sparkles className="text-amber-400 animate-pulse" size={24} />
+                    </div>
+                    <p className="text-slate-500 font-bold text-sm uppercase tracking-widest opacity-60 italic">Advanced Global Infrastructure Monitoring & Clinical KPI Matrix</p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl border font-black text-[0.65rem] uppercase tracking-widest transition-all shadow-sm ${socketConnected ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100 animate-pulse'}`}>
+                        <CircleDot size={12} className={socketConnected ? 'animate-pulse' : ''} />
+                        {socketConnected ? 'Real-time Link Active' : 'Offline Mode'}
+                    </div>
+                    <button onClick={() => window.location.reload()} className="p-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:rotate-180 transition-all duration-700 text-slate-400 hover:text-blue-500">
+                        <RefreshCcw size={20} />
+                    </button>
+                </div>
             </div>
 
-            {/* Primary Stats Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* Matrix Grid - Expanded with 12 KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {cards.map((s, i) => (
-                    <div key={i} className="bg-white border border-slate-200 p-6 rounded-[2rem] flex items-center gap-6 shadow-sm hover:shadow-md transition-shadow">
-                        <div className={`flex items-center justify-center rounded-2xl w-16 h-16 min-w-[64px] shadow-sm ${s.bg} ${s.color}`}>
-                            <s.icon size={26} strokeWidth={2.5} />
+                    <div key={i} className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-[40px] flex flex-col gap-6 shadow-sm hover:shadow-2xl transition-all relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-transparent dark:from-slate-800 opacity-40 rounded-bl-[100px] -mr-8 -mt-8 pointer-events-none"></div>
+                        <div className="flex justify-between items-start relative z-10">
+                            <div className={`flex items-center justify-center rounded-[24px] w-14 h-14 shadow-lg ${s.bg} ${s.color} group-hover:scale-110 transition-transform duration-500`}>
+                                <s.icon size={26} strokeWidth={2.5} />
+                            </div>
+                            <div className="flex flex-col items-end">
+                                <span className={`text-[0.6rem] font-black px-2.5 py-1 rounded-xl flex items-center gap-1.5 border shadow-sm ${s.bg} ${s.color} border-transparent`}>
+                                    <TrendingUp size={10} /> {s.trend}
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-slate-400 text-[0.65rem] font-black uppercase tracking-widest">{s.label}</span>
-                            <h2 className="font-black text-3xl mt-1 text-slate-800">{s.val}</h2>
+                        <div className="relative z-10">
+                            <span className="text-slate-400 text-[0.65rem] font-black uppercase tracking-[0.1em] block mb-2 opacity-70 italic">{s.label}</span>
+                            <h2 className="font-black text-4xl text-slate-900 dark:text-white tracking-tighter tabular-nums drop-shadow-sm">{s.val.toLocaleString()}</h2>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Simulated Live Architecture Status */}
-            <div className="bg-white border border-slate-200 p-10 h-full relative overflow-hidden rounded-[2.5rem] shadow-sm">
-                <div className="relative z-10 flex flex-col gap-10">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h4 className="font-black text-xl mb-2 text-slate-800">Platform Health</h4>
-                            <p className="text-slate-500 font-medium text-sm">Engagement efficiency across major domains.</p>
-                        </div>
-                        <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[0.65rem] font-black uppercase tracking-widest border border-blue-100">All Systems Normal</div>
-                    </div>
-
-                    <div className="flex flex-col gap-6 max-w-4xl">
-                        {[
-                            { l: 'Clinical Consultations Flow', p: '92%', c: 'bg-emerald-500', t: 'text-emerald-600' },
-                            { l: 'Research Content Delivery', p: '78%', c: 'bg-purple-500', t: 'text-purple-600' },
-                            { l: 'Emergency Request Routing', p: '99%', c: 'bg-blue-500', t: 'text-blue-600' }
-                        ].map((m, i) => (
-                            <div key={i} className="flex flex-col gap-3">
-                                <div className="flex justify-between text-[0.65rem] font-black text-slate-500 tracking-widest uppercase">
-                                    <span>{m.l}</span>
-                                    <span className={m.t}>{m.p} Efficiency</span>
-                                </div>
-                                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                                    <div className={`${m.c} h-3 rounded-full transition-all duration-1000`} style={{ width: m.p }}></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
