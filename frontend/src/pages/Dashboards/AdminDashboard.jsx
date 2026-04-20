@@ -73,7 +73,7 @@ const AdminDashboard = () => {
                 });
 
             } catch (err) {
-                toast.error("Connectivity Issue: Please ensure backend is active", { icon: '🚀' });
+                toast.error("Could not connect to the system.", { icon: '🚀' });
             } finally {
                 setLoading(false);
             }
@@ -86,7 +86,7 @@ const AdminDashboard = () => {
 
         socketRef.current.on('connect', () => {
             setSocketConnected(true);
-            toast.success("Real-time telemetry active", {
+            toast.success("Live data active!", {
                 id: 'socket-conn',
                 duration: 2000,
                 style: { background: '#1e293b', color: '#fff', fontSize: '12px', fontWeight: 'bold' }
@@ -142,11 +142,11 @@ const AdminDashboard = () => {
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <h1 className="font-black text-5xl tracking-tight text-slate-900 dark:text-white uppercase italic">
-                            Command <span className="text-blue-600 not-italic">Center</span>
+                            AxonX <span className="text-blue-600 not-italic">Dashboard</span>
                         </h1>
                         <Sparkles className="text-amber-400 animate-pulse" size={24} />
                     </div>
-                    <p className="text-slate-500 font-bold text-sm uppercase tracking-widest opacity-60 italic">Advanced Global Infrastructure Monitoring & Clinical KPI Matrix</p>
+                    <p className="text-slate-500 font-bold text-sm uppercase tracking-widest opacity-60 italic">AxonX KPI matrix</p>
                 </div>
 
                 <div className="flex items-center gap-4">
