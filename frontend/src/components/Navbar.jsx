@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Sun, Moon, LayoutDashboard, ChevronRight } from 'lucide-react';
+import { LogOut, Sun, Moon, LayoutDashboard, Menu, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
   const { user, theme, toggleTheme, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
@@ -16,8 +17,8 @@ const Navbar = () => {
 
   const linkClass = (path) =>
     `text-sm font-bold transition-all relative py-1 ${isActive(path)
-      ? 'text-slate-900 dark:text-white'
-      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+      ? 'text-blue-500 underline decoration-2 underline-offset-8'
+      : 'text-slate-500 dark:text-slate-400 hover:text-blue-500'
     }`;
 
   const handleLogout = () => {
@@ -28,32 +29,20 @@ const Navbar = () => {
 
   return (
     <nav
-      style={{ height: '5rem' }}
-      className="fixed top-0 left-0 w-full z-50 flex items-center bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-all duration-300"
+      style={{ minHeight: '5rem' }}
+      className="fixed top-0 left-0 w-full z-50 flex flex-col bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-all duration-300"
     >
-      <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 flex justify-between items-center">
+      <div className="w-full h-20 max-w-7xl mx-auto px-6 sm:px-8 flex justify-between items-center">
 
         {/* 🔷 LOGO */}
         <Link to="/" className="flex items-center gap-3 no-underline group transition-transform hover:scale-105 active:scale-95">
-          <span
-            style={{
-              background: 'linear-gradient(135deg, #38bdf8, #34d399)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontSize: '2.5rem',
-              fontWeight: 900
-            }}
-            className="font-black italic"
-          >
+          <span className="font-black italic">
             <img src="/light-mode.png" alt="AxonX Logo" className="h-10 w-auto" />
           </span>
 
           <span
-            style={{
-              fontSize: '1.75rem',
-              fontWeight: 900
-            }}
-            className="font-black text-slate-900 dark:text-white tracking-tighter"
+            style={{ fontSize: '1.75rem', fontWeight: 900 }}
+            className="font-black text-slate-900 dark:text-white tracking-tighter hidden sm:block"
           >
             Axon
             <span
@@ -79,7 +68,6 @@ const Navbar = () => {
 
         {/* 🔷 RIGHT SIDE */}
         <div className="flex items-center gap-4 sm:gap-6">
-
           {/* 🌙 Theme Toggle */}
           <button
             onClick={toggleTheme}
@@ -89,7 +77,7 @@ const Navbar = () => {
           </button>
 
           {!user ? (
-            <div className="flex items-center gap-6 ml-2">
+            <div className="hidden sm:flex items-center gap-6 ml-2">
               <Link to="/login" className="text-sm font-bold text-slate-900 dark:text-white hover:opacity-70 transition-opacity">
                 Log In
               </Link>
@@ -102,7 +90,7 @@ const Navbar = () => {
               </Link>
             </div>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-4">
               <Link
                 to={user.role === 'admin' ? '/admin/dashboard' : `/dashboard/${user.role}`}
                 className="flex items-center gap-2 px-6 py-3 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest bg-blue-500 text-white shadow-lg active:scale-95 transition-all"
@@ -118,8 +106,62 @@ const Navbar = () => {
               </button>
             </div>
           )}
+
+          {/* 🍔 Mobile Menu Toggle */}
+          <button 
+            className="lg:hidden p-2 text-slate-600 dark:text-slate-300"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
+
+      {/* 📱 Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden flex flex-col bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 px-6 py-4 shadow-lg">
+          <ul className="flex flex-col gap-4 list-none m-0 p-0 mb-6">
+            <li><Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={linkClass('/')}>Home</Link></li>
+            <li><Link to="/departments" onClick={() => setIsMobileMenuOpen(false)} className={linkClass('/departments')}>Departments</Link></li>
+            <li><Link to="/events" onClick={() => setIsMobileMenuOpen(false)} className={linkClass('/events')}>Events</Link></li>
+            <li><Link to="/research" onClick={() => setIsMobileMenuOpen(false)} className={linkClass('/research')}>Research</Link></li>
+            <li><Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className={linkClass('/contact')}>Contact Us</Link></li>
+          </ul>
+
+          <div className="flex flex-col gap-4 border-t border-slate-200 dark:border-slate-800 pt-4">
+            {!user ? (
+              <>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 dark:text-white py-2">
+                  Log In
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-6 py-3 text-center rounded-full text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md"
+                >
+                  Get Started
+                </Link>
+              </>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <Link
+                  to={user.role === 'admin' ? '/admin/dashboard' : `/dashboard/${user.role}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-[0.75rem] font-black uppercase tracking-widest bg-blue-500 text-white shadow-lg active:scale-95 transition-all"
+                >
+                  <LayoutDashboard size={16} /> {user.role === 'admin' ? 'Admin Hub' : 'My Portal'}
+                </Link>
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                  className="p-3 rounded-2xl bg-rose-50 text-rose-500 font-bold hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  <LogOut size={18} /> Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

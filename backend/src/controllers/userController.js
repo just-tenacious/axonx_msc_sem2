@@ -12,8 +12,7 @@ export default {
         try {
             const filter = {};
             if (req.query.role) filter.role = req.query.role;
-            if (req.query.subDeptId) filter.subDepartments = req.query.subDeptId;
-            const users = await User.find(filter).select('-password').populate('subDepartments', 'name departmentId');
+            const users = await User.find(filter).select('-password');
             res.status(200).json({ success: true, count: users.length, data: users });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
@@ -24,9 +23,8 @@ export default {
     getHospitalsBySubDept: async (req, res) => {
         try {
             const { subDeptId } = req.params;
-            const hospitals = await User.find({ role: 'hospital', subDepartments: subDeptId })
-                .select('-password')
-                .populate('subDepartments', 'name');
+            const hospitals = await User.find({ role: 'hospital' })
+                .select('-password');
             res.status(200).json({ success: true, count: hospitals.length, data: hospitals });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });

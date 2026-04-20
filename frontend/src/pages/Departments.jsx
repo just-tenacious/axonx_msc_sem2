@@ -80,15 +80,29 @@ const Departments = () => {
     }
   };
 
+  const logBrowseActivity = async (payload) => {
+    if (!user) return;
+    try {
+        await axios.post(`${BASE_URL}/browse-history`, {
+            userId: user._id,
+            ...payload
+        });
+    } catch (e) {
+        console.error("Failed to log browse history", e);
+    }
+  };
+
   const handleDeptClick = (dept) => {
     setSelectedMainDept(dept);
     setView('subdepts');
+    logBrowseActivity({ departmentId: dept._id, actionType: 'view_department' });
   };
 
   const handleSubDeptClick = (sub) => {
     setSelectedSubDept(sub);
     fetchHospitalsByDept(selectedMainDept._id);
     setView('hospitals');
+    logBrowseActivity({ departmentId: selectedMainDept._id, subDepartmentId: sub._id, actionType: 'view_subdepartment' });
   };
 
   const handleHospitalClick = (hosp) => {
@@ -100,6 +114,7 @@ const Departments = () => {
   const handleDoctorClick = (doc) => {
     setSelectedDoctor(doc);
     setView('doctor-profile');
+    logBrowseActivity({ doctorId: doc._id, actionType: 'view_doctor' });
   };
 
   const Breadcrumbs = () => (
@@ -373,12 +388,6 @@ const Departments = () => {
                             className="flex-1 py-6 bg-blue-600 text-white font-black rounded-[32px] shadow-2xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all text-[0.7rem] uppercase tracking-widest no-underline"
                            >
                               Secure Appointment Session
-                           </button>
-                           <button 
-                            onClick={() => isLoggedIn ? navigate('/chats') : navigate('/login')}
-                            className="flex-1 py-6 border-2 border-slate-100 dark:border-slate-800 text-slate-400 font-extrabold rounded-[32px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all uppercase text-[0.7rem] tracking-widest"
-                           >
-                              Clinical Consultation
                            </button>
                       </div>
                   </div>

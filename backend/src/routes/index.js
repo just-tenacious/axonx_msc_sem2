@@ -4,11 +4,10 @@ import availabilityRoutes from "./availabilityRoutes.js";
 import departmentController from "../controllers/departmentController.js";
 import subDeptController from "../controllers/subDeptController.js";
 import appointmentController from "../controllers/appointmentController.js";
-import messageController from "../controllers/messageController.js";
 import researchController from "../controllers/researchController.js";
 import * as contactController from "../controllers/contactController.js";
 import eventRoutes from "./eventRoutes.js";
-import chatRoutes from "./chatRoutes.js";
+import browseHistoryRoutes from "./browseHistoryRoutes.js";
 
 const router = express.Router();
 
@@ -16,7 +15,7 @@ const router = express.Router();
 router.use("/users", userRoutes);
 router.use("/availability", availabilityRoutes);
 router.use("/events", eventRoutes);
-router.use("/chats", chatRoutes);
+router.use("/browse-history", browseHistoryRoutes);
 
 // ── Department Routes (custom controller with block/revoke + subdept count) ──
 router.get("/departments",             departmentController.getAll);
@@ -46,7 +45,6 @@ router.patch("/sub-departments/:id/block",  subDeptController.block);
 router.patch("/sub-departments/:id/revoke", subDeptController.revoke);
 router.get("/appointments/stats", appointmentController.getStats);
 mapBasicRoutes("/appointments", appointmentController);
-mapBasicRoutes("/messages", messageController);
 mapBasicRoutes("/research-papers", researchController);
 router.patch("/research-papers/:id/status", researchController.updateNodalStatus);
 

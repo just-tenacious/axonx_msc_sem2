@@ -49,6 +49,24 @@ const Events = () => {
     return matchesSearch;
   });
 
+  const logBrowseActivity = async (eventId) => {
+    if (!user) return;
+    try {
+        await axios.post(`${BASE_URL}/browse-history`, {
+            userId: user._id,
+            eventId: eventId,
+            actionType: 'view_event'
+        });
+    } catch (e) {
+        console.error("Failed to log activity", e);
+    }
+  };
+
+  const handleEventClick = (e) => {
+    setSelectedEvent(e);
+    if(e._id) logBrowseActivity(e._id);
+  };
+
   const Breadcrumbs = () => (
     <nav className="flex items-center gap-2 text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-400 mb-12 overflow-x-auto pb-2 shrink-0">
       <button onClick={() => {setSearchQuery(''); setSelectedEvent(null);}} className="hover:text-blue-500 transition-colors">Ecosystem</button>
@@ -169,7 +187,7 @@ const Events = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {filteredEvents.map((e, index) => (
-          <div key={e._id || index} onClick={() => setSelectedEvent(e)} className="group bg-white dark:bg-slate-900 rounded-[48px] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer flex flex-col">
+          <div key={e._id || index} onClick={() => handleEventClick(e)} className="group bg-white dark:bg-slate-900 rounded-[48px] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer flex flex-col">
              <div className="h-64 relative overflow-hidden">
                 <img src={e.image || `https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&fit=crop&sig=${index}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt="" />
                 <div className="absolute top-6 left-6 px-4 py-1.5 bg-white/90 dark:bg-slate-950/90 rounded-full text-[0.6rem] font-black text-blue-500 shadow-lg">UPCOMING</div>

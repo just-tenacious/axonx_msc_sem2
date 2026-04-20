@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import Pagination from '../../components/Admin/Pagination';
 
 const BASE_URL = 'http://localhost:5000/api';
 
@@ -186,17 +187,14 @@ const Support = () => {
                     </table>
                 </div>
 
-                <div className="p-8 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/20">
-                    <p className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest italic">Registry Artifacts: {currentItems.length} of {filtered.length}</p>
-                    <div className="flex items-center gap-3">
-                        <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-400 hover:text-blue-500 border border-slate-100 dark:border-slate-700 shadow-sm disabled:opacity-30"><ChevronLeft size={20} /></button>
-                        <div className="flex items-center gap-1">
-                            {Array.from({ length: totalPages }).map((_, i) => (
-                                <button key={i} onClick={() => setCurrentPage(i+1)} className={`w-10 h-10 rounded-xl font-black text-[0.7rem] transition-all ${currentPage === i+1 ? 'bg-blue-600 text-white shadow-xl scale-110' : 'text-slate-400 hover:bg-white dark:hover:bg-slate-800'}`}>{i+1}</button>
-                            ))}
-                        </div>
-                        <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-400 hover:text-blue-500 border border-slate-100 dark:border-slate-700 shadow-sm disabled:opacity-30"><ChevronRight size={20} /></button>
-                    </div>
+                <div className="p-8 border-t border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                    <Pagination 
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filtered.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                    />
                 </div>
             </div>
 

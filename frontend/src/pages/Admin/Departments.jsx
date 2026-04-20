@@ -6,7 +6,7 @@ import {
     ImageIcon, RefreshCw
 } from 'lucide-react';
 import axios from 'axios';
-import toast from 'react-hot-toast';
+import Pagination from '../../components/Admin/Pagination';
 
 const BASE     = 'http://localhost:5000';
 const DEPT_API = `${BASE}/api/departments`;
@@ -467,16 +467,7 @@ const Departments = () => {
         { label: 'Sub-Depts', value: departments.reduce((s, d) => s + (d.subDepartmentCount || 0), 0),    clr: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20', ring: 'ring-purple-200 dark:ring-purple-800' },
     ];
 
-    /* ── Pagination ──────────────────────────────────────────────────────── */
-    const Pagin = ({ total, pages }) => pages <= 1 ? null : (
-        <div className="flex items-center justify-between px-1">
-            <p className="text-[0.62rem] font-bold text-[var(--text-muted)] uppercase tracking-widest">Page {currentPage} / {pages} — {total} items</p>
-            <div className="flex gap-2">
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2.5 rounded-xl border border-[var(--border-color)] disabled:opacity-30 hover:border-blue-500 transition-all bg-white dark:bg-[#1e293b]"><ChevronLeft size={14} /></button>
-                <button onClick={() => setCurrentPage(p => Math.min(pages, p + 1))} disabled={currentPage === pages} className="p-2.5 rounded-xl border border-[var(--border-color)] disabled:opacity-30 hover:border-blue-500 transition-all bg-white dark:bg-[#1e293b]"><ChevronRight size={14} /></button>
-            </div>
-        </div>
-    );
+
 
     /* ════════════════════════════════════════════════════════════════════════
        RENDER
@@ -658,11 +649,29 @@ const Departments = () => {
                                 </tbody>
                             </table>
                         </div>
-                        <div className="p-5 border-t border-[var(--border-color-light)]"><Pagin total={filteredDepts.length} pages={deptPages} /></div>
+                    <div className="p-5 border-t border-[var(--border-color-light)]">
+                        <Pagination 
+                            currentPage={currentPage}
+                            totalPages={deptPages}
+                            totalItems={filteredDepts.length}
+                            itemsPerPage={ITEMS}
+                            onPageChange={setCurrentPage}
+                        />
+                    </div>
                     </div>
                 )}
 
-                {viewMode === 'grid' && <Pagin total={filteredDepts.length} pages={deptPages} />}
+                {viewMode === 'grid' && (
+                    <div className="mt-6">
+                        <Pagination 
+                            currentPage={currentPage}
+                            totalPages={deptPages}
+                            totalItems={filteredDepts.length}
+                            itemsPerPage={ITEMS}
+                            onPageChange={setCurrentPage}
+                        />
+                    </div>
+                )}
             </>)}
 
             {/* ════════════════════════════════════════════════════════════
@@ -879,11 +888,29 @@ const Departments = () => {
                                 </tbody>
                             </table>
                         </div>
-                        <div className="p-5 border-t border-[var(--border-color-light)]"><Pagin total={filteredSubs.length} pages={subPages} /></div>
+                        <div className="p-5 border-t border-[var(--border-color-light)]">
+                            <Pagination 
+                                currentPage={currentPage}
+                                totalPages={subPages}
+                                totalItems={filteredSubs.length}
+                                itemsPerPage={ITEMS}
+                                onPageChange={setCurrentPage}
+                            />
+                        </div>
                     </div>
                 )}
 
-                {viewMode === 'grid' && <Pagin total={filteredSubs.length} pages={subPages} />}
+                {viewMode === 'grid' && (
+                    <div className="mt-8">
+                        <Pagination 
+                            currentPage={currentPage}
+                            totalPages={subPages}
+                            totalItems={filteredSubs.length}
+                            itemsPerPage={ITEMS}
+                            onPageChange={setCurrentPage}
+                        />
+                    </div>
+                )}
             </>)}
 
             {/* ══════════════════════════════════════════════════════════

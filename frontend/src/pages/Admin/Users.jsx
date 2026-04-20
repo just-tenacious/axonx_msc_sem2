@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import Pagination from '../../components/Admin/Pagination';
 
 const BASE_URL = 'http://localhost:5000/api/users';
 
@@ -197,7 +198,12 @@ const Users = () => {
                 </div>
                 <div className="pro-card p-0 overflow-hidden shadow-2xl border-0">
                     <div className="p-6 border-b border-[var(--border-color-light)] flex flex-wrap items-center gap-4">
-                        <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} /><input type="text" placeholder="Search by name or email…" className="pro-input w-full pl-11 h-12" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
+                        <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} /><input type="text" placeholder="Search by name or email…" className="pro-input w-full pl-11 h-12" value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }} /></div>
+                        <div className="flex bg-[var(--bg-color)] p-1 rounded-2xl border border-[var(--border-color)] overflow-x-auto">
+                            {[{id: 'all', label: 'All'}, {id: 'active', label: 'Active'}, {id: 'suspended', label: 'Blocked'}].map(s => (
+                                <button key={s.id} onClick={() => { setStatusFilter({ id: s.id }); setCurrentPage(1); }} className={`px-4 py-2 text-[0.6rem] font-black uppercase rounded-xl transition-all whitespace-nowrap ${statusFilter.id === s.id ? 'bg-white text-blue-500 shadow-sm' : 'text-[var(--text-muted)]'}`}>{s.label}</button>
+                            ))}
+                        </div>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left font-sans">
@@ -219,6 +225,17 @@ const Users = () => {
                             </tbody>
                         </table>
                     </div>
+                    {totalPages > 1 && (
+                        <div className="p-6 border-t border-[var(--border-color-light)] bg-slate-50/50">
+                            <Pagination 
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={displayList.length}
+                                itemsPerPage={itemsPerPage}
+                                onPageChange={setCurrentPage}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         );

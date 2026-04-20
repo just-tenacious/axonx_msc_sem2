@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import Pagination from '../../components/Admin/Pagination';
 
 const BASE = 'http://localhost:5000/api';
 
@@ -219,12 +220,14 @@ const Events = () => {
                         </table>
                     </div>
                     {totalPages > 1 && (
-                        <div className="p-6 border-t border-[var(--border-color-light)] flex items-center justify-between bg-slate-50/50">
-                            <span className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">Page {currentPage} of {totalPages}</span>
-                            <div className="flex gap-3">
-                                <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="px-6 py-2.5 rounded-xl bg-white border font-black text-[0.65rem] uppercase tracking-widest disabled:opacity-40 transition-all hover:shadow-md text-slate-600">Prev</button>
-                                <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="px-6 py-2.5 rounded-xl border border-blue-100 font-black text-[0.65rem] uppercase tracking-widest disabled:opacity-40 transition-all text-blue-600 bg-blue-50 hover:bg-blue-500 hover:text-white shadow-sm">Next</button>
-                            </div>
+                        <div className="p-6 border-t border-[var(--border-color-light)] bg-slate-50/50">
+                            <Pagination 
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={filtered.length}
+                                itemsPerPage={itemsPerPage}
+                                onPageChange={setCurrentPage}
+                            />
                         </div>
                     )}
                 </div>

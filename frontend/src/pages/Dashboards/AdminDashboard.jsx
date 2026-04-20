@@ -21,9 +21,9 @@ const AdminDashboard = () => {
                 const requests = [
                     axios.get('http://localhost:5000/api/users').catch(() => ({ data: { data: [] } })),
                     axios.get('http://localhost:5000/api/appointments').catch(() => ({ data: { data: [] } })),
-                    axios.get('http://localhost:5000/api/researchPapers').catch(() => ({ data: { data: [] } })),
+                    axios.get('http://localhost:5000/api/research-papers').catch(() => ({ data: { data: [] } })),
                     axios.get('http://localhost:5000/api/events').catch(() => ({ data: { data: [] } })),
-                    axios.get('http://localhost:5000/api/contactQueries').catch(() => ({ data: { data: [] } }))
+                    axios.get('http://localhost:5000/api/support/queries').catch(() => ({ data: { data: [] } }))
                 ];
 
                 const [resUsers, resApts, resRes, resEvts, resQu] = await Promise.all(requests);
@@ -40,7 +40,11 @@ const AdminDashboard = () => {
                     queries: resQu.data?.data?.length || 0
                 });
             } catch (err) {
-                toast.error("Failed to sync dashboard metrics");
+                console.error("Dashboard Fetch Error:", err);
+                toast.error("Connectivity Issue: Please ensure backend server is running on port 5000", {
+                    duration: 5000,
+                    icon: '🚀'
+                });
             } finally {
                 setLoading(false);
             }

@@ -23,7 +23,7 @@ const Analytics = () => {
       const requests = [
         axios.get('http://localhost:5000/api/users').catch(() => ({ data: { data: [] }})),
         axios.get('http://localhost:5000/api/appointments').catch(() => ({ data: { data: [] }})),
-        axios.get('http://localhost:5000/api/researchPapers').catch(() => ({ data: { data: [] }})),
+        axios.get('http://localhost:5000/api/research-papers').catch(() => ({ data: { data: [] }})),
         axios.get('http://localhost:5000/api/events').catch(() => ({ data: { data: [] }})),
         axios.get('http://localhost:5000/api/departments').catch(() => ({ data: { data: [] }}))
       ];

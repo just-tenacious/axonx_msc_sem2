@@ -29,7 +29,6 @@ import AdminDepartments from '../pages/Admin/Departments';
 import Appointments from '../pages/Admin/Appointments';
 import AdminEvents from '../pages/Admin/Events';
 import AdminResearch from '../pages/Admin/Research';
-import Chats from '../pages/Admin/Chats';
 import Support from '../pages/Admin/Support';
 import Analytics from '../pages/Admin/Analytics';
 
@@ -63,7 +62,6 @@ const AppRoutes = () => {
                 <Route path="appointments" element={<Appointments />} />
                 <Route path="events" element={<AdminEvents />} />
                 <Route path="research" element={<AdminResearch />} />
-                <Route path="chats" element={<Chats />} />
                 <Route path="support" element={<Support />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="profile" element={<Profile />} />

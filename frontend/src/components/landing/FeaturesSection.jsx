@@ -2,12 +2,6 @@ import React from 'react';
 
 const features = [
   {
-    title: 'Real-Time Communication',
-    desc: 'Seamlessly chat with peers, join public groups, or have secure private consultations utilizing our robust chat engine.',
-    tag: 'Chat & Forums',
-    image: '/images/comm.png'
-  },
-  {
     title: 'Event Publishing System',
     desc: 'Hospitals and organizations can easily host, manage, and promote medical camps, webinars, and regional conferences.',
     tag: 'Events',

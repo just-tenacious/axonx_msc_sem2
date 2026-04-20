@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet, Navigate } from 'react-router-dom';
-import { 
-    LayoutDashboard, 
-    Users, 
-    Building2, 
-    CalendarCheck, 
-    CalendarDays, 
-    BookOpen, 
-    MessageSquare, 
-    LifeBuoy, 
-    BarChart3, 
+import {
+    LayoutDashboard,
+    Users,
+    Building2,
+    CalendarCheck,
+    CalendarDays,
+    BookOpen,
+    MessageSquare,
+    LifeBuoy,
+    BarChart3,
     UserCircle,
     Menu,
     Moon,
@@ -50,12 +50,9 @@ const AdminLayout = () => {
         { name: 'Appointments', icon: CalendarCheck, path: '/admin/appointments' },
         { name: 'Events', icon: CalendarDays, path: '/admin/events' },
         { name: 'Research', icon: BookOpen, path: '/admin/research' },
-        { name: 'Chats', icon: MessageSquare, path: '/admin/chats' },
         { name: 'Support', icon: LifeBuoy, path: '/admin/support' },
         { name: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
         { name: 'Profile', icon: UserCircle, path: '/admin/profile' },
-        { name: 'Site Login', icon: LogOut, path: '/login' },
-        { name: 'Site Register', icon: UserCircle, path: '/register' },
     ];
 
     const handleLogout = () => {
@@ -68,7 +65,7 @@ const AdminLayout = () => {
         <div className="flex h-screen bg-[var(--bg-color)] overflow-hidden transition-colors duration-400">
             {/* Sidebar Overlay for Mobile */}
             {isMobileMenuOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
@@ -98,8 +95,8 @@ const AdminLayout = () => {
                             }}
                             className={`
                                 w-full flex items-center px-6 py-3.5 transition-all duration-200 group
-                                ${location.pathname === item.path 
-                                    ? 'bg-[#1e40af] dark:bg-blue-600/20 text-white border-r-4 border-[#0ea5e9]' 
+                                ${location.pathname === item.path
+                                    ? 'bg-[#1e40af] dark:bg-blue-600/20 text-white border-r-4 border-[#0ea5e9]'
                                     : 'text-blue-200/70 hover:bg-[#1e40af]/30 hover:text-white'}
                             `}
                         >
@@ -119,7 +116,7 @@ const AdminLayout = () => {
             <div className="flex-1 flex flex-col overflow-hidden">
                 <header className="h-16 bg-[var(--topbar-bg)] border-b border-[var(--border-color)] flex items-center justify-between px-6 z-30 transition-colors duration-400 shadow-sm relative">
                     <div className="flex items-center gap-4">
-                        <button 
+                        <button
                             onClick={() => window.innerWidth < 1024 ? setIsMobileMenuOpen(!isMobileMenuOpen) : setIsCollapsed(!isCollapsed)}
                             className="p-2 rounded-xl hover:bg-[var(--hover-bg)] text-[var(--text-muted)] transition-all hover:text-[var(--primary-accent)]"
                         >
@@ -127,7 +124,6 @@ const AdminLayout = () => {
                         </button>
                         <div className="hidden md:flex flex-col">
                             <h2 className="text-sm font-black text-[var(--text-main)] opacity-70 uppercase tracking-[0.1em]">AxonX Healthcare System</h2>
-                            <p className="text-[0.6rem] text-[var(--text-muted)] font-black italic tracking-tight uppercase">Portal Integration Active</p>
                         </div>
                     </div>
 
@@ -138,7 +134,7 @@ const AdminLayout = () => {
 
                         {/* Profile Wrapper */}
                         <div className="relative">
-                            <button 
+                            <button
                                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                                 className="flex items-center gap-3 p-1.5 pl-3 rounded-2xl hover:bg-[var(--hover-bg)] transition-all border border-transparent hover:border-[var(--border-color)]"
                             >
