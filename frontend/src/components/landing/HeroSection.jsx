@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
-    <section style={{ position: 'relative', paddingTop: '5rem', paddingBottom: '8rem', overflow: 'hidden', minHeight: 'calc(100vh - 5rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section style={{ position: 'relative', paddingTop: '10rem', paddingBottom: '8rem', overflow: 'hidden', minHeight: 'calc(100vh - 5rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       {/* Background glow */}
       <div style={{
         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
@@ -19,10 +19,7 @@ const HeroSection = () => {
           {/* Text Content */}
           <div className="flex flex-col items-start pt-10 lg:pt-0 text-left">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 shadow-md mb-8" style={{ backdropFilter: 'blur(12px)' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>
-              <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }} className="text-slate-800 dark:text-slate-300">AxonX is Live</span>
-            </div>
+
 
             <h1 style={{
               fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
