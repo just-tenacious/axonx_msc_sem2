@@ -10,11 +10,6 @@ const schema = new mongoose.Schema({
     type: String,
     enum: ["Pending","Confirmed","Cancelled", "Completed"],
     default: "Pending"
-  },
-  type: {
-    type: String,
-    enum: ["online","offline"],
-    default: "offline"
   }
 }, { timestamps: true });
 

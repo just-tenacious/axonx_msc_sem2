@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { 
-    Calendar, MapPin, Users, Ticket, CheckCircle2, Clock, XCircle, 
+    Calendar, MapPin, Users, User, Ticket, CheckCircle2, Clock, XCircle, 
     Search, Filter, ChevronRight, ArrowLeft, Plus, Eye, Edit2, 
     Activity, Info, CalendarDays, ExternalLink, RefreshCw, X, Check,
     ShieldCheck, Briefcase, Award, AlignLeft, Tag, Layers, ChevronDown
@@ -25,7 +25,7 @@ const Events = () => {
     const [editForm, setEditForm] = useState({
         title: '', tagline: '', detailedDescription: '', category: 'Conference', location: '',
         startDate: '', endDate: '', timings: '', status: 'Upcoming', image: '',
-        departments: [], subDepartments: []
+        registrationUrl: '', departments: [], subDepartments: []
     });
     // Dept/SubDept data for picker
     const [allDepts, setAllDepts] = useState([]);
@@ -41,9 +41,21 @@ const Events = () => {
         axios.get(`${BASE}/departments`).then(({ data }) => { if (data.success) setAllDepts(data.data); }).catch(() => {});
     }, []);
 
+    const [logs, setLogs] = useState([]);
     useEffect(() => {
         if (view === 'list') fetchEvents();
     }, [view, selectedStatus]);
+
+    useEffect(() => {
+        if (view === 'detail' && selectedEvent) {
+            fetchEventLogs(selectedEvent.title);
+        }
+    }, [view, selectedEvent]);
+
+    const fetchEventLogs = async (title) => {
+        // Browse history removed â€” no-op
+        setLogs([]);
+    }
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -58,10 +70,20 @@ const Events = () => {
     // Load sub-depts whenever selected depts change (during edit/create)
     useEffect(() => {
         if (!editForm.departments || editForm.departments.length === 0) { setAllSubDepts([]); return; }
-        // Fetch sub-depts for all selected dept IDs
         const ids = editForm.departments;
         Promise.all(ids.map(id => axios.get(`${BASE}/sub-departments?departmentId=${id}`).then(r => r.data.data || []).catch(() => [])))
-            .then(results => setAllSubDepts(results.flat()));
+            .then(results => {
+                const flattened = results.flat();
+                setAllSubDepts(flattened);
+                
+                // If we are in edit mode and just loaded these sub-depts, map names back to IDs if editForm.subDepartments contains names
+                if (editForm.subDepartments && editForm.subDepartments.length > 0 && typeof editForm.subDepartments[0] === 'string') {
+                    const mappedIds = editForm.subDepartments.map(name => flattened.find(s => s.name === name)?._id).filter(Boolean);
+                    if (mappedIds.length > 0) {
+                        setEditForm(f => ({ ...f, subDepartments: mappedIds }));
+                    }
+                }
+            });
     }, [JSON.stringify(editForm.departments)]);
 
     const fetchStats = async () => {
@@ -94,13 +116,13 @@ const Events = () => {
                     ? editForm.subDepartments.map(id => allSubDepts.find(s => s._id === id)?.name || id)
                     : [],
             };
-            const tid = toast.loading("Updating Protocol...");
+            const tid = toast.loading("Saving...");
             if (view === 'create') {
                 await axios.post(`${BASE}/events`, payload);
-                toast.success("Event Added Successfully", { id: tid });
+                toast.success("Added successfully", { id: tid });
             } else {
                 await axios.put(`${BASE}/events/${selectedEvent._id}`, payload);
-                toast.success("Protocol Updated Successfully", { id: tid });
+                toast.success("Updated successfully", { id: tid });
             }
             setView('list');
             fetchStats();
@@ -110,7 +132,7 @@ const Events = () => {
     };
 
     const openCreate = () => {
-        setEditForm({ title: '', tagline: '', detailedDescription: '', category: 'Conference', location: '', startDate: '', endDate: '', timings: '', status: 'Upcoming', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80', departments: [], subDepartments: [] });
+        setEditForm({ title: '', tagline: '', detailedDescription: '', category: 'Conference', location: '', startDate: '', endDate: '', timings: '', status: 'Upcoming', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80', registrationUrl: '', departments: [], subDepartments: [] });
         setView('create');
     }
 
@@ -125,7 +147,7 @@ const Events = () => {
         }
     };
 
-    /* ── DASHBOARD VIEW ─────────────────────────────────────────────────── */
+    /* â”€â”€ DASHBOARD VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     if (view === 'dashboard') {
         const cardConfig = [
             { id: 'All',       name: 'Global Events', count: stats.all,       icon: CalendarDays, color: 'from-blue-500 to-blue-600',   bg: 'bg-blue-50 text-blue-600' },
@@ -161,7 +183,7 @@ const Events = () => {
         );
     }
 
-    /* ── LIST VIEW ──────────────────────────────────────────────────────── */
+    /* â”€â”€ LIST VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     if (view === 'list') {
         const filtered = events.filter(e => e.title.toLowerCase().includes(searchTerm.toLowerCase()));
         const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -184,7 +206,7 @@ const Events = () => {
                 </div>
                 <div className="pro-card p-0 overflow-hidden shadow-2xl">
                     <div className="p-6 border-b border-[var(--border-color-light)] flex flex-wrap items-center gap-4">
-                        <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} /><input type="text" placeholder="Search events…" className="pro-input w-full pl-11 h-12" value={searchTerm} onChange={e => {setSearchTerm(e.target.value); setCurrentPage(1);}} /></div>
+                        <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} /><input type="text" placeholder="Search eventsâ€¦" className="pro-input w-full pl-11 h-12" value={searchTerm} onChange={e => {setSearchTerm(e.target.value); setCurrentPage(1);}} /></div>
                         <div className="flex bg-[var(--bg-color)] p-1 rounded-2xl border border-[var(--border-color)] overflow-x-auto">
                             {['All', 'Upcoming', 'Ongoing', 'Completed', 'Cancelled'].map(s => (
                                 <button key={s} onClick={() => {setSelectedStatus(s); setCurrentPage(1);}} className={`px-4 py-2 text-[0.6rem] font-black uppercase rounded-xl transition-all whitespace-nowrap ${selectedStatus === s ? 'bg-white text-blue-500 shadow-sm' : 'text-[var(--text-muted)]'}`}>{s}</button>
@@ -207,9 +229,17 @@ const Events = () => {
                                             <button onClick={() => { 
                                                 setSelectedEvent(evt); 
                                                 const d = {...evt};
-                                                if(d.startDate) d.date = new Date(d.startDate).toISOString().substring(0,10);
-                                                d.departments = d.departments?.join(', ') || '';
-                                                d.subDepartments = d.subDepartments?.join(', ') || '';
+                                                // Convert dates to YYYY-MM-DD for input[type="date"]
+                                                if(d.startDate) d.startDate = new Date(d.startDate).toISOString().substring(0,10);
+                                                if(d.endDate) d.endDate = new Date(d.endDate).toISOString().substring(0,10);
+                                                
+                                                // Map names from DB back to IDs for the picker to work
+                                                d.departments = d.departments?.map(name => allDepts.find(ad => ad.name === name)?._id).filter(Boolean) || [];
+                                                
+                                                // Note: allSubDepts might not be loaded yet for these specific depts in this tick
+                                                // But the useEffect for editForm.departments will trigger and fetch them.
+                                                // We'll set sub-dept names momentarily then the names back to IDs
+                                                // Actually it's better to store IDs in DB, but since we have names:
                                                 setEditForm(d); 
                                                 setView('edit'); 
                                             }} className="p-3 text-emerald-500 bg-emerald-50 rounded-xl hover:bg-emerald-500 hover:text-white transition-all"><Edit2 size={16} /></button>
@@ -235,7 +265,7 @@ const Events = () => {
         );
     }
 
-    /* ── DETAIL VIEW ────────────────────────────────────────────────────── */
+    /* â”€â”€ DETAIL VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     if (view === 'detail' && selectedEvent) {
         const e = selectedEvent;
         return (
@@ -277,13 +307,13 @@ const Events = () => {
                                 <div className="flex items-center gap-3"><Calendar size={22} /> Operations & Timings</div>
                                 <button onClick={() => { 
                                     const d = {...e}; 
-                                    if(d.startDate) d.date = new Date(d.startDate).toISOString().substring(0,10); 
-                                    d.departments = d.departments?.join(', ') || '';
-                                    d.subDepartments = d.subDepartments?.join(', ') || '';
+                                    if(d.startDate) d.startDate = new Date(d.startDate).toISOString().substring(0,10);
+                                    if(d.endDate) d.endDate = new Date(d.endDate).toISOString().substring(0,10);
+                                    d.departments = d.departments?.map(name => allDepts.find(ad => ad.name === name)?._id).filter(Boolean) || [];
                                     setEditForm(d); setView('edit'); 
                                 }} className="text-[0.65rem] font-black bg-blue-50 text-blue-600 px-5 py-3 rounded-xl hover:bg-blue-500 hover:text-white transition-all uppercase tracking-widest flex items-center gap-2 shadow-sm"><Edit2 size={14} /> Update Record</button>
                             </h4>
-                            
+
                             <div className="grid grid-cols-2 gap-y-10 gap-x-8 text-left mb-10">
                                 <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm">
                                     <p className="text-[0.65rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest flex items-center gap-2"><CalendarDays size={14}/> Proposed Date</p>
@@ -301,6 +331,12 @@ const Events = () => {
                                     <p className="text-[0.65rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest flex items-center gap-2"><CalendarDays size={14}/> End Date</p>
                                     <p className="text-base font-black text-slate-800">{e.endDate ? new Date(e.endDate).toLocaleDateString() : 'N/A'}</p>
                                 </div>
+                                {e.registrationUrl && (
+                                    <div className="col-span-2 p-6 bg-blue-50 rounded-3xl border border-blue-100 shadow-sm">
+                                        <p className="text-[0.65rem] font-black text-blue-500 uppercase mb-2 ml-1 tracking-widest flex items-center gap-2"><ExternalLink size={14}/> Registration URL</p>
+                                        <a href={e.registrationUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-black text-blue-600 hover:underline break-all">{e.registrationUrl}</a>
+                                    </div>
+                                )}
                             </div>
 
                             <h4 className="text-[0.65rem] font-black text-slate-800 uppercase tracking-widest mb-6 border-b pb-4 mt-8 flex items-center gap-2"><Layers size={18} className="text-blue-500" /> Department Engagements</h4>
@@ -321,6 +357,41 @@ const Events = () => {
                                         )) : <span className="text-xs font-bold text-slate-400 italic">No sub-divisions attached.</span>}
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Telemetry Logs Section */}
+                        <div className="pro-card p-12 bg-white shadow-xl border-0 rounded-[48px] border-t-[16px] border-slate-800">
+                            <h4 className="text-[0.65rem] font-black text-slate-800 uppercase tracking-widest mb-8 flex items-center gap-3 border-b pb-6">
+                                <Activity size={22} className="text-blue-500" /> Interaction Telemetry & Logs
+                            </h4>
+                            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-4 custom-scrollbar">
+                                {logs.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {logs.map((log, i) => (
+                                            <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-200 transition-colors">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-slate-200 shadow-sm overflow-hidden text-blue-500 font-black">
+                                                        {log.userId?.avatar ? <img src={log.userId.avatar} alt="" className="w-full h-full object-cover" /> : <User size={16} />}
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <p className="text-xs font-black text-slate-800">{log.userId?.name || 'Anonymous User'}</p>
+                                                        <p className="text-[0.6rem] font-black text-blue-500 uppercase tracking-tighter">Action: {log.type || 'Interaction'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[0.65rem] font-black text-slate-400 uppercase">{new Date(log.viewedAt).toLocaleTimeString()}</p>
+                                                    <p className="text-[0.55rem] font-medium text-slate-300 italic">{new Date(log.viewedAt).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-12 text-center">
+                                        <Activity size={32} className="mx-auto text-slate-200 mb-4 animate-pulse" />
+                                        <p className="text-xs font-bold text-slate-300 uppercase tracking-widest leading-loose">No telemetry data captured for this clinical node.<br /><span className="text-[0.6rem] opacity-50 italic">Logs are populated upon user engagement in the public ecosystem.</span></p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -350,8 +421,8 @@ const Events = () => {
                         <div className="space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1">Category Registry</label><select required className="pro-input w-full h-14 px-6 rounded-2xl font-bold" value={editForm.category} onChange={e => setEditForm({...editForm, category: e.target.value})}><option value="Conference">Conference</option><option value="Workshop">Workshop</option><option value="Seminar">Seminar</option><option value="Symposium">Symposium</option></select></div>
 
                         {/* Schedule & Timings */}
-                        <div className="space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1">Start Date</label><input type="date" required className="pro-input w-full h-14 px-6 rounded-2xl font-bold" value={editForm.startDate || editForm.date || ''} onChange={e => setEditForm({...editForm, startDate: e.target.value, date: e.target.value})}/></div>
-                        <div className="space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1">End Date</label><input type="date" required className="pro-input w-full h-14 px-6 rounded-2xl font-bold" value={editForm.endDate ? new Date(editForm.endDate).toISOString().substring(0,10) : ''} onChange={e => setEditForm({...editForm, endDate: e.target.value})}/></div>
+                        <div className="space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1">Start Date</label><input type="date" required className="pro-input w-full h-14 px-6 rounded-2xl font-bold" value={editForm.startDate || ''} onChange={e => setEditForm({...editForm, startDate: e.target.value})}/></div>
+                        <div className="space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1">End Date</label><input type="date" required className="pro-input w-full h-14 px-6 rounded-2xl font-bold" value={editForm.endDate || ''} onChange={e => setEditForm({...editForm, endDate: e.target.value})}/></div>
 
                         <div className="space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5"><Clock size={12} className="text-blue-500" /> Event Timings (Range)</label><input type="text" placeholder="10:00 AM - 4:00 PM" className="pro-input w-full h-14 px-6 rounded-2xl font-bold" value={editForm.timings} onChange={e => setEditForm({...editForm, timings: e.target.value})}/></div>
                         
@@ -366,7 +437,7 @@ const Events = () => {
                             <button type="button" onClick={() => setDeptOpen(o => !o)}
                                 className="pro-input w-full h-14 px-5 rounded-2xl font-bold flex items-center justify-between text-left">
                                 <span className={editForm.departments?.length ? 'text-slate-700 text-sm' : 'text-slate-400 text-sm'}>
-                                    {editForm.departments?.length ? `${editForm.departments.length} dept${editForm.departments.length > 1 ? 's' : ''} selected` : 'Select departments…'}
+                                    {editForm.departments?.length ? `${editForm.departments.length} dept${editForm.departments.length > 1 ? 's' : ''} selected` : 'Select departmentsâ€¦'}
                                 </span>
                                 <ChevronDown size={16} className="text-slate-400" />
                             </button>
@@ -409,7 +480,7 @@ const Events = () => {
                                 disabled={editForm.departments?.length === 0}
                                 className="pro-input w-full h-14 px-5 rounded-2xl font-bold flex items-center justify-between text-left disabled:opacity-40">
                                 <span className={editForm.subDepartments?.length ? 'text-slate-700 text-sm' : 'text-slate-400 text-sm'}>
-                                    {editForm.departments?.length === 0 ? 'Select departments first…' : editForm.subDepartments?.length ? `${editForm.subDepartments.length} sub-dept${editForm.subDepartments.length > 1 ? 's' : ''} selected` : 'Select sub-departments…'}
+                                    {editForm.departments?.length === 0 ? 'Select departments firstâ€¦' : editForm.subDepartments?.length ? `${editForm.subDepartments.length} sub-dept${editForm.subDepartments.length > 1 ? 's' : ''} selected` : 'Select sub-departmentsâ€¦'}
                                 </span>
                                 <ChevronDown size={16} className="text-slate-400" />
                             </button>
@@ -446,6 +517,9 @@ const Events = () => {
                                 </div>
                             )}
                         </div>
+
+                        {/* Registration URL */}
+                        <div className="col-span-2 space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5"><ExternalLink size={12} className="text-blue-500" /> External Registration URL (optional)</label><input type="url" placeholder="https://example.com/register" className="pro-input w-full h-14 px-6 rounded-2xl font-bold" value={editForm.registrationUrl || ''} onChange={e => setEditForm({...editForm, registrationUrl: e.target.value})}/></div>
 
                         {/* Textarea for detailed description */}
                         <div className="col-span-2 space-y-3"><label className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest ml-1">Detailed Description</label><textarea required className="pro-input w-full h-32 p-6 rounded-3xl font-bold resize-none" value={editForm.detailedDescription} onChange={e => setEditForm({...editForm, detailedDescription: e.target.value})}></textarea></div>

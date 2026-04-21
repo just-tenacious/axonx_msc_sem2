@@ -2,6 +2,7 @@ import ResearchPaper from "../models/ResearchPaper.js";
 import Like from "../models/Like.js";
 import Comment from "../models/Comment.js";
 import SavedItem from "../models/SavedItem.js";
+import Review from "../models/Review.js";
 import { createBaseController } from "./baseController.js";
 import logger from "../utils/logger.js";
 
@@ -24,16 +25,24 @@ export default {
 
             // Enhance with dynamic interaction aggregations
             const enrichedPapers = await Promise.all(papers.map(async (paper) => {
-                const [likes, comments, saves] = await Promise.all([
+                const [likes, comments, saves, ratingRes] = await Promise.all([
                     Like.countDocuments({ targetId: paper._id }),
                     Comment.countDocuments({ targetId: paper._id }),
-                    SavedItem.countDocuments({ itemId: paper._id })
+                    SavedItem.countDocuments({ itemId: paper._id }),
+                    paper.publisherId?.role === 'doctor' 
+                        ? Review.aggregate([
+                            { $match: { doctorId: paper.publisherId?._id } },
+                            { $group: { _id: null, avg: { $avg: "$rating" } } }
+                          ])
+                        : Promise.resolve([])
                 ]);
+
                 return {
                     ...paper.toObject(),
                     likesCount: likes,
                     commentsCountVal: comments,
-                    savedCount: saves
+                    savedCount: saves,
+                    publisherRating: ratingRes.length > 0 ? ratingRes[0].avg : 0
                 };
             }));
 
@@ -54,10 +63,16 @@ export default {
 
             if (!paper) return res.status(404).json({ success: false, error: "Manuscript not found" });
 
-            const [likes, comments, saves] = await Promise.all([
+            const [likes, comments, saves, ratingRes] = await Promise.all([
                 Like.find({ targetId: paper._id }).populate('userId', 'name avatar username role'),
                 Comment.find({ targetId: paper._id }).populate('userId', 'name avatar username role'),
-                SavedItem.countDocuments({ itemId: paper._id })
+                SavedItem.countDocuments({ itemId: paper._id }),
+                paper.publisherId?.role === 'doctor' 
+                    ? Review.aggregate([
+                        { $match: { doctorId: paper.publisherId?._id } },
+                        { $group: { _id: null, avg: { $avg: "$rating" } } }
+                      ])
+                    : Promise.resolve([])
             ]);
 
             res.status(200).json({
@@ -66,7 +81,8 @@ export default {
                     ...paper.toObject(),
                     likes,
                     comments,
-                    savedCount: saves
+                    savedCount: saves,
+                    publisherRating: ratingRes.length > 0 ? ratingRes[0].avg : 0
                 }
             });
         } catch (error) {
@@ -98,6 +114,16 @@ export default {
                 data: paper,
                 message: `Manuscript status transitioned to ${status}`
             });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
+
+    getPapersByPublisher: async (req, res) => {
+        try {
+            const { userId } = req.params;
+            const papers = await ResearchPaper.find({ publisherId: userId }).sort({ createdAt: -1 });
+            res.status(200).json({ success: true, data: papers });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }

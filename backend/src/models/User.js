@@ -16,8 +16,24 @@ const schema = new mongoose.Schema({
   dob: { type: Date },
   avatar: { type: String },
   bio: { type: String },
-  specialization: { type: String }
+  departmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Department" },
+  subDepartmentId: { type: mongoose.Schema.Types.ObjectId, ref: "SubDepartment" },
+  hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
 }, { timestamps: true });
+
+schema.pre('save', function() {
+  if (this.hospitalId && this.role !== 'doctor') {
+    throw new Error('Security Constraint: Hospital associations are only valid for clinical commander (doctor) nodes.');
+  }
+});
+
+schema.pre('findOneAndUpdate', function() {
+  const update = this.getUpdate();
+  const role = update.role || (update.$set && update.$set.role);
+  if ((update.hospitalId || (update.$set && update.$set.hospitalId)) && role && role !== 'doctor') {
+    throw new Error('Security Constraint: Hospital associations are only valid for clinical commander (doctor) nodes.');
+  }
+});
 
 schema.plugin(softDeletePlugin);
 

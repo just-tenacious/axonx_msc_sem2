@@ -20,7 +20,7 @@ const Pagination = ({
     return (
         <div className="flex items-center justify-between w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
             <p className="text-[0.62rem] font-black text-slate-400 uppercase tracking-[0.2em] italic">
-                Registry Coverage: <span className="text-blue-500">{startItem} - {endItem}</span> of {totalItems} entries
+                Registry Coverage: {startItem} - {endItem} of {totalItems} entries
             </p>
             
             <div className="flex items-center gap-3">

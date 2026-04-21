@@ -30,7 +30,7 @@ const Users = () => {
 
     const [selectedUser, setSelectedUser] = useState(null);
     const [editForm, setEditForm] = useState({
-        name: '', username: '', email: '', gender: '', dob: '', role: 'patient'
+        name: '', username: '', email: '', gender: '', dob: '', role: 'patient', bio: ''
     });
 
     const roleCards = [
@@ -92,7 +92,7 @@ const Users = () => {
         try {
             const next = !user.isActive;
             await axios.put(`${BASE_URL}/${user._id}`, { isActive: next });
-            toast.success(next ? "Access restored" : "Access blocked");
+            toast.success(next ? "Access restored" : "Blocked successfully");
             fetchUsers();
         } catch { toast.error("Update failed"); }
     };
@@ -110,7 +110,8 @@ const Users = () => {
             email: user.email || '',
             gender: user.gender || '',
             dob: user.dob ? user.dob.substring(0, 10) : '',
-            role: user.role || 'patient'
+            role: user.role || 'patient',
+            bio: user.bio || ''
         });
         setView('edit-profile');
     };
@@ -213,7 +214,26 @@ const Users = () => {
                                 pagedUsers.map((user, index) => (
                                     <tr key={user._id} className="hover:bg-blue-50/10 transition-colors group">
                                         <td className="px-8 py-6 text-xs font-bold text-[var(--text-muted)] opacity-40 text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                                        <td className="px-8 py-6"><div className="flex items-center gap-5"><div className="w-11 h-11 rounded-2xl bg-blue-50 overflow-hidden border-2 border-white shadow-sm flex-shrink-0"><img src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} className="w-full h-full object-cover" alt="avatar" /></div><div><p className="text-sm font-black text-[var(--text-main)] tracking-tight">{user.name}</p><p className="text-[0.6rem] text-[var(--text-muted)] font-black uppercase tracking-wider italic">@{user.username} • {user.email}</p></div></div></td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-5">
+                                                <div className="w-11 h-11 rounded-2xl bg-blue-50 overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
+                                                    <img src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} className="w-full h-full object-cover" alt="avatar" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-black text-[var(--text-main)] tracking-tight">
+                                                        {user.role === 'hospital' ? user.name : user.name}
+                                                        {user.role === 'doctor' && user.rating > 0 && (
+                                                            <span className="ml-3 text-[0.65rem] font-black bg-amber-100 text-amber-600 px-2 py-0.5 rounded-lg border border-amber-200">
+                                                                ★ {user.rating.toFixed(1)}
+                                                            </span>
+                                                        )}
+                                                    </p>
+                                                    <p className="text-[0.6rem] text-[var(--text-muted)] font-black uppercase tracking-wider italic">
+                                                        {user.role === 'hospital' ? `Node: @${user.username} • Official Email: ${user.email}` : `@${user.username} • ${user.email}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td className="px-8 py-6">{roleBadge(user.role)}</td>
                                         <td className="px-8 py-6 text-right"><div className="flex items-center justify-end gap-2.5">
                                             <button onClick={() => openViewProfile(user)} className="p-3 text-blue-500 bg-blue-50 hover:bg-blue-500 hover:text-white rounded-xl transition-all shadow-sm" title="View Detail"><Eye size={16} /></button>
@@ -262,8 +282,19 @@ const Users = () => {
                                 <div className="w-32 h-32 mx-auto rounded-[42px] border-4 border-white shadow-2xl overflow-hidden bg-white mb-6">
                                     <img src={u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`} className="w-full h-full object-cover" alt="avatar" />
                                 </div>
-                                <h2 className="text-3xl font-black text-[var(--text-main)] tracking-tighter">{u.name}</h2>
-                                <p className="text-[0.65rem] font-black text-blue-500 uppercase tracking-widest mt-1">@{u.username}</p>
+                                <h2 className="text-3xl font-black text-[var(--text-main)] tracking-tighter">
+                                    {u.name}
+                                    {u.role === 'doctor' && u.rating > 0 && (
+                                        <div className="flex items-center justify-center mt-2">
+                                            <span className="text-sm font-black bg-amber-100 text-amber-600 px-3 py-1 rounded-xl border border-amber-200 flex items-center gap-1.5">
+                                                ★ {u.rating.toFixed(1)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </h2>
+                                <p className="text-[0.65rem] font-black text-blue-500 uppercase tracking-widest mt-1">
+                                    {u.role === 'hospital' ? `Hospital Node: @${u.username}` : `@${u.username}`}
+                                </p>
                                 <div className="mt-8 flex justify-center">{roleBadge(u.role)}</div>
                             </div>
                         </div>
@@ -280,11 +311,22 @@ const Users = () => {
                     </div>
                     <div className="lg:col-span-2 space-y-6">
                         <div className="pro-card p-12 bg-white shadow-xl border rounded-[48px]">
-                            <h4 className="text-[0.65rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-12 flex items-center gap-3"><Info size={18} className="text-blue-500" /> Identity Details</h4>
+                            <h4 className="text-[0.65rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-12 flex items-center gap-3"><Info size={18} className="text-blue-500" /> {u.role === 'hospital' ? 'Institutional Credentials' : 'Identity Details'}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 font-sans text-left">
-                                <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Email Address</p><p className="text-sm font-black text-blue-600 underline underline-offset-4 decoration-blue-100 italic">{u.email}</p></div>
-                                <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">System Node</p><p className="text-sm font-black text-slate-700">Maharashtra, India (IN)</p></div>
-                                <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Biological Info</p><p className="text-sm font-black text-slate-700 capitalize">{u.gender || 'Not Disclosed'} <span className="mx-2 opacity-30">•</span> {u.dob ? new Date(u.dob).toLocaleDateString() : 'N/A'}</p></div>
+                                <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">{u.role === 'hospital' ? 'Official Email' : 'Email Address'}</p><p className="text-sm font-black text-blue-600 underline underline-offset-4 decoration-blue-100 italic">{u.email}</p></div>
+                                <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">{u.role === 'hospital' ? 'Federated Node' : 'System Node'}</p><p className="text-sm font-black text-slate-700">Maharashtra, India (IN)</p></div>
+                                {u.role === 'hospital' ? (
+                                    <>
+                                        <div className="md:col-span-1"><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Hospital Username</p><p className="text-sm font-black text-slate-700">@{u.username}</p></div>
+                                        <div className="md:col-span-1"><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Registration Status</p><p className="text-sm font-black text-emerald-600 flex items-center gap-2"><CheckCircle size={14}/> Verified Multi-Specialty</p></div>
+                                        <div className="md:col-span-2"><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Bio / Mission Statement</p><p className="text-sm font-bold text-slate-600 leading-relaxed italic border-l-4 border-blue-500 pl-4">{u.bio || 'Dedicated to providing advanced tertiary healthcare and surgical excellence.'}</p></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Biological Info</p><p className="text-sm font-black text-slate-700 capitalize">{u.gender || 'Not Disclosed'} <span className="mx-2 opacity-30">•</span> {u.dob ? new Date(u.dob).toLocaleDateString() : 'N/A'}</p></div>
+                                        <div className="md:col-span-1"><p className="text-[0.6rem] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Identity Bio</p><p className="text-sm font-bold text-slate-600 leading-relaxed italic">{u.bio || 'Active participant in the clinical ecosystem.'}</p></div>
+                                    </>
+                                )}
                             </div>
                         </div>
                         <div className="flex gap-4">
@@ -314,6 +356,7 @@ const Users = () => {
                              <div className="space-y-2 md:col-span-2"><label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label><input required type="email" className="pro-input w-full px-6 h-16 rounded-[24px] font-bold" value={editForm.email} onChange={e => setEditForm(f => ({...f, email: e.target.value}))} /></div>
                              <div className="space-y-2"><label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-1">Gender</label><select className="pro-input w-full h-16 px-6 font-bold rounded-[24px]" value={editForm.gender} onChange={e => setEditForm(f => ({...f, gender: e.target.value}))}><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
                              <div className="space-y-2"><label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-1">Role</label><select className="pro-input w-full h-16 px-6 font-bold rounded-[24px] bg-slate-50 italic" value={editForm.role} onChange={e => setEditForm(f => ({...f, role: e.target.value}))}><option value="patient">Patient</option><option value="doctor">Doctor</option><option value="hospital">Hospital</option><option value="student">Student</option><option value="researcher">Researcher</option></select></div>
+                             <div className="space-y-2 md:col-span-2"><label className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest ml-1">Professional Bio</label><textarea className="pro-input w-full p-6 min-h-[120px] rounded-[24px] font-bold resize-none" value={editForm.bio} onChange={e => setEditForm(f => ({...f, bio: e.target.value}))} placeholder="Write a short summary..."/></div>
                         </div>
                         <div className="pt-8 flex gap-6 text-center"><button type="button" onClick={() => setView('view-profile')} className="flex-1 py-5 border-2 text-slate-400 font-extrabold rounded-[28px] hover:bg-slate-50 transition-all uppercase text-[0.7rem] tracking-widest">Cancel</button><button type="submit" className="flex-1 py-5 bg-emerald-500 text-white font-extrabold rounded-[28px] shadow-2xl shadow-emerald-500/30 hover:bg-emerald-600 active:scale-95 transition-all uppercase text-[0.7rem] tracking-widest">Update</button></div>
                     </form>

@@ -128,22 +128,20 @@ const Research = () => {
 
     const handleUpdateStatus = async (paperId, newStatus) => {
         try {
-            setLoading(true);
+            const tid = toast.loading("Saving...");
             const { data } = await axios.patch(`${BASE_URL}/research-papers/${paperId}/status`, {
                 status: newStatus
             });
             if (data.success) {
-                toast.success(`Manuscript transitioned to ${newStatus}`);
+                toast.success("Updated successfully", { id: tid });
                 fetchPapers();
                 if (selectedPaper) {
                    const updatedPaperRes = await axios.get(`${BASE_URL}/research-papers/${paperId}`);
                    setSelectedPaper(updatedPaperRes.data.data);
                 }
             }
-            setLoading(false);
         } catch (error) {
-            toast.error("Status update protocol failed");
-            setLoading(false);
+            toast.error("Update failed");
         }
     };
 
@@ -158,13 +156,13 @@ const Research = () => {
             };
             const { data } = await axios.post(`${BASE_URL}/research-papers`, paperData);
             if (data.success) {
-                toast.success("Document uploaded for verification");
+                toast.success("Uploaded successfully");
                 fetchPapers();
                 setView('list');
             }
             setLoading(false);
         } catch (error) {
-            toast.error("Transmission failed");
+            toast.error("Upload failed");
             setLoading(false);
         }
     };
@@ -344,7 +342,16 @@ const Research = () => {
                                                 </div>
                                                 <div>
                                                     <p className="text-md font-black text-slate-900 dark:text-white leading-tight uppercase tracking-tighter italic">{p.title}</p>
-                                                    <p className="text-[0.6rem] text-slate-400 font-black uppercase tracking-widest mt-1 italic block">{p.publisherId?.name}</p>
+                                                    <div className="flex items-center gap-3 mt-1">
+                                                        <p className="text-[0.6rem] text-slate-400 font-black uppercase tracking-widest italic block">{p.publisherId?.name}</p>
+                                                        {p.publisherRating > 0 && (
+                                                            <div className="flex items-center justify-center mt-2">
+                                                                <span className="text-sm font-black bg-amber-100 text-amber-600 px-3 py-1 rounded-xl border border-amber-200 flex items-center gap-1.5">
+                                                                    ★ {p.publisherRating.toFixed(1)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -471,8 +478,16 @@ const Research = () => {
                                 <div className="w-24 h-24 rounded-[32px] border-4 border-white dark:border-slate-800 overflow-hidden shadow-xl shadow-blue-500/10">
                                     <img src={p.publisherId?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.publisherId?._id}`} className="w-full h-full object-cover" alt="" />
                                 </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-black text-slate-950 dark:text-white tracking-tighter uppercase italic leading-none">{p.publisherId?.name || "Unverified"}</h3>
+                                <div className="space-y-2 flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-2xl font-black text-slate-950 dark:text-white tracking-tighter uppercase italic leading-none">{p.publisherId?.name || "Unverified"}</h3>
+                                        {p.publisherRating > 0 && (
+                                            <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 px-3 py-1.5 rounded-2xl border border-amber-100 dark:border-amber-900/30">
+                                                <span className="text-xs font-black">{p.publisherRating.toFixed(1)}</span>
+                                                <Award size={14} className="fill-amber-600" />
+                                            </div>
+                                        )}
+                                    </div>
                                     <p className="text-[0.65rem] font-black text-blue-500 uppercase tracking-[0.2em]">{p.publisherId?.role || "Practitioner"}</p>
                                 </div>
                              </div>

@@ -6,14 +6,15 @@ import {
     ImageIcon, RefreshCw
 } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import Pagination from '../../components/Admin/Pagination';
 
-const BASE     = 'http://localhost:5000';
+const BASE = 'http://localhost:5000';
 const DEPT_API = `${BASE}/api/departments`;
-const SUB_API  = `${BASE}/api/sub-departments`;
+const SUB_API = `${BASE}/api/sub-departments`;
 
 const EMPTY_DEPT = { name: '', description: '', details: '' };
-const EMPTY_SUB  = { name: '', info: '', description: '', details: '' };
+const EMPTY_SUB = { name: '', info: '', description: '', details: '' };
 
 const imgSrc = (item) => item?.image ? `${BASE}${item.image}` : null;
 
@@ -96,7 +97,7 @@ const DeptInfoModal = ({ dept, onClose, onToggle }) => (
             </div>
             <div className="p-6 space-y-3">
                 {dept.description && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Description</p><p className="text-sm text-[var(--text-main)] leading-relaxed">{dept.description}</p></div>}
-                {dept.details    && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Details</p><p className="text-sm text-[var(--text-main)] leading-relaxed">{dept.details}</p></div>}
+                {dept.details && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Details</p><p className="text-sm text-[var(--text-main)] leading-relaxed">{dept.details}</p></div>}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Sub-Depts</p><p className="text-xl font-black text-purple-500">{dept.subDepartmentCount ?? 0}</p></div>
                     <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]">
@@ -104,8 +105,8 @@ const DeptInfoModal = ({ dept, onClose, onToggle }) => (
                         <p className={`text-sm font-black ${dept.isActive ? 'text-green-500' : 'text-red-500'}`}>{dept.isActive ? 'Active' : 'Blocked'}</p>
                     </div>
                 </div>
-                <button 
-                    onClick={() => onToggle(dept)} 
+                <button
+                    onClick={() => onToggle(dept)}
                     className={`w-full py-3.5 text-white font-black rounded-2xl active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2 ${dept.isActive ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/30' : 'bg-green-500 hover:bg-green-600 shadow-green-500/30'}`}
                 >
                     {dept.isActive ? <><ShieldOff size={16} /> Block Access</> : <><ShieldCheck size={16} /> Restore Access</>}
@@ -146,9 +147,9 @@ const SubInfoModal = ({ sub, dept, onClose, onToggle }) => (
 
             {/* Info body */}
             <div className="p-6 space-y-3">
-                {sub.info        && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Info</p><p className="text-sm font-bold text-purple-500">{sub.info}</p></div>}
+                {sub.info && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Info</p><p className="text-sm font-bold text-purple-500">{sub.info}</p></div>}
                 {sub.description && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Description</p><p className="text-sm text-[var(--text-main)] leading-relaxed">{sub.description}</p></div>}
-                {sub.details     && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Details</p><p className="text-sm text-[var(--text-main)] leading-relaxed">{sub.details}</p></div>}
+                {sub.details && <div className="p-4 bg-[var(--bg-color)] rounded-2xl border border-[var(--border-color-light)]"><p className="text-[0.55rem] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Details</p><p className="text-sm text-[var(--text-main)] leading-relaxed">{sub.details}</p></div>}
 
                 <div className="flex gap-3 pt-1">
                     <button onClick={onClose} className="flex-1 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] text-[var(--text-main)] font-black rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all text-sm">Close</button>
@@ -261,46 +262,46 @@ const VIEW_TOGGLE = ({ viewMode, setViewMode }) => (
 ═══════════════════════════════════════════════════════════════════════════ */
 const Departments = () => {
     /* ── Page navigation ─────────────────────────────────────────────────── */
-    const [page, setPage]                 = useState('main'); // 'main' | 'subdepts'
+    const [page, setPage] = useState('main'); // 'main' | 'subdepts'
     const [selectedDept, setSelectedDept] = useState(null);
-    const [viewMode, setViewMode]         = useState('grid');
+    const [viewMode, setViewMode] = useState('grid');
     const [statusFilter, setStatusFilter] = useState('all');  // 'all'|'active'|'blocked'
-    const [searchTerm, setSearchTerm]     = useState('');
-    const [currentPage, setCurrentPage]   = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
     const ITEMS = viewMode === 'grid' ? 9 : 8;
 
     /* ── Data ────────────────────────────────────────────────────────────── */
     const [departments, setDepartments] = useState([]);
-    const [subDepts, setSubDepts]       = useState([]);
-    const [loading, setLoading]         = useState(true);
+    const [subDepts, setSubDepts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     /* ── Modal flags ─────────────────────────────────────────────────────── */
-    const [showDeptInfo, setShowDeptInfo]   = useState(false);
-    const [showSubInfo, setShowSubInfo]     = useState(false);
-    const [showAddDept, setShowAddDept]     = useState(false);
-    const [showEditDept, setShowEditDept]   = useState(false);
-    const [showAddSub, setShowAddSub]       = useState(false);
-    const [showEditSub, setShowEditSub]     = useState(false);
+    const [showDeptInfo, setShowDeptInfo] = useState(false);
+    const [showSubInfo, setShowSubInfo] = useState(false);
+    const [showAddDept, setShowAddDept] = useState(false);
+    const [showEditDept, setShowEditDept] = useState(false);
+    const [showAddSub, setShowAddSub] = useState(false);
+    const [showEditSub, setShowEditSub] = useState(false);
 
     /* ── Targeted items ──────────────────────────────────────────────────── */
     const [activeDept, setActiveDept] = useState(null);
-    const [activeSub, setActiveSub]   = useState(null);
+    const [activeSub, setActiveSub] = useState(null);
 
     /* ── Form state ──────────────────────────────────────────────────────── */
-    const [deptForm, setDeptForm]     = useState(EMPTY_DEPT);
-    const [subForm, setSubForm]       = useState(EMPTY_SUB);
+    const [deptForm, setDeptForm] = useState(EMPTY_DEPT);
+    const [subForm, setSubForm] = useState(EMPTY_SUB);
     const [submitting, setSubmitting] = useState(false);
 
     /* ── Image state: dept ───────────────────────────────────────────────── */
-    const [deptImgFile, setDeptImgFile]       = useState(null);
+    const [deptImgFile, setDeptImgFile] = useState(null);
     const [deptImgPreview, setDeptImgPreview] = useState('');
-    const [deptImgClear, setDeptImgClear]     = useState(false);
+    const [deptImgClear, setDeptImgClear] = useState(false);
     const deptFileRef = useRef(null);
 
     /* ── Image state: sub ────────────────────────────────────────────────── */
-    const [subImgFile, setSubImgFile]       = useState(null);
+    const [subImgFile, setSubImgFile] = useState(null);
     const [subImgPreview, setSubImgPreview] = useState('');
-    const [subImgClear, setSubImgClear]     = useState(false);
+    const [subImgClear, setSubImgClear] = useState(false);
     const subFileRef = useRef(null);
 
     /* ── Fetch ───────────────────────────────────────────────────────────── */
@@ -332,10 +333,10 @@ const Departments = () => {
     };
 
     /* ── Image handlers ──────────────────────────────────────────────────── */
-    const onDeptPick  = (f, p) => { setDeptImgFile(f); setDeptImgPreview(p); setDeptImgClear(false); };
-    const onDeptClear = ()     => { setDeptImgFile(null); setDeptImgPreview(''); setDeptImgClear(true); if (deptFileRef.current) deptFileRef.current.value = ''; };
-    const onSubPick   = (f, p) => { setSubImgFile(f); setSubImgPreview(p); setSubImgClear(false); };
-    const onSubClear  = ()     => { setSubImgFile(null); setSubImgPreview(''); setSubImgClear(true); if (subFileRef.current) subFileRef.current.value = ''; };
+    const onDeptPick = (f, p) => { setDeptImgFile(f); setDeptImgPreview(p); setDeptImgClear(false); };
+    const onDeptClear = () => { setDeptImgFile(null); setDeptImgPreview(''); setDeptImgClear(true); if (deptFileRef.current) deptFileRef.current.value = ''; };
+    const onSubPick = (f, p) => { setSubImgFile(f); setSubImgPreview(p); setSubImgClear(false); };
+    const onSubClear = () => { setSubImgFile(null); setSubImgPreview(''); setSubImgClear(true); if (subFileRef.current) subFileRef.current.value = ''; };
 
     /* ── FormData builders ───────────────────────────────────────────────── */
     const buildDeptFD = (clear = false) => {
@@ -358,8 +359,8 @@ const Departments = () => {
     const MFD = { headers: { 'Content-Type': 'multipart/form-data' } };
 
     /* ── Open dept modals ────────────────────────────────────────────────── */
-    const openDeptInfo  = (d) => { setActiveDept(d); setShowDeptInfo(true); };
-    const openAddDeptM  = ()  => { setDeptForm(EMPTY_DEPT); onDeptClear(); setShowAddDept(true); };
+    const openDeptInfo = (d) => { setActiveDept(d); setShowDeptInfo(true); };
+    const openAddDeptM = () => { setDeptForm(EMPTY_DEPT); onDeptClear(); setShowAddDept(true); };
     const openEditDeptM = (d) => {
         setActiveDept(d);
         setDeptForm({ name: d.name || '', description: d.description || '', details: d.details || '' });
@@ -368,8 +369,8 @@ const Departments = () => {
     };
 
     /* ── Open sub modals ─────────────────────────────────────────────────── */
-    const openSubInfo  = (s) => { setActiveSub(s); setShowSubInfo(true); };
-    const openAddSubM  = ()  => { setSubForm(EMPTY_SUB); onSubClear(); setShowAddSub(true); };
+    const openSubInfo = (s) => { setActiveSub(s); setShowSubInfo(true); };
+    const openAddSubM = () => { setSubForm(EMPTY_SUB); onSubClear(); setShowAddSub(true); };
     const openEditSubM = (s) => {
         setActiveSub(s);
         setSubForm({ name: s.name || '', info: s.info || '', description: s.description || '', details: s.details || '' });
@@ -403,10 +404,11 @@ const Departments = () => {
     };
 
     const handleToggleDept = async (dept, closeModal = false) => {
+        const loader = toast.loading(dept.isActive ? "Blocking…" : "Restoring…");
         const action = dept.isActive ? 'block' : 'revoke';
         try {
             await axios.patch(`${DEPT_API}/${dept._id}/${action}`);
-            toast.success(dept.isActive ? 'Department blocked' : 'Access restored');
+            toast.success(dept.isActive ? "Department blocked" : "Access restored", { id: loader });
             if (closeModal) setShowDeptInfo(false);
             // Update selectedDept if it's the one being toggled
             if (page === 'subdepts' && selectedDept?._id === dept._id) {
@@ -455,16 +457,16 @@ const Departments = () => {
     });
 
     const deptPages = Math.ceil(filteredDepts.length / ITEMS);
-    const subPages  = Math.ceil(filteredSubs.length / ITEMS);
+    const subPages = Math.ceil(filteredSubs.length / ITEMS);
     const pagedDepts = filteredDepts.slice((currentPage - 1) * ITEMS, currentPage * ITEMS);
-    const pagedSubs  = filteredSubs.slice((currentPage - 1) * ITEMS, currentPage * ITEMS);
+    const pagedSubs = filteredSubs.slice((currentPage - 1) * ITEMS, currentPage * ITEMS);
 
     /* ── Stats ───────────────────────────────────────────────────────────── */
     const STATS = [
-        { label: 'Total',     value: departments.length,                                                   clr: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20',   ring: 'ring-blue-200 dark:ring-blue-800' },
-        { label: 'Active',    value: departments.filter(d => d.isActive).length,                           clr: 'text-green-500',  bg: 'bg-green-50 dark:bg-green-900/20', ring: 'ring-green-200 dark:ring-green-800' },
-        { label: 'Blocked',   value: departments.filter(d => !d.isActive).length,                          clr: 'text-red-500',    bg: 'bg-red-50 dark:bg-red-900/20',     ring: 'ring-red-200 dark:ring-red-800' },
-        { label: 'Sub-Depts', value: departments.reduce((s, d) => s + (d.subDepartmentCount || 0), 0),    clr: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20', ring: 'ring-purple-200 dark:ring-purple-800' },
+        { label: 'Total', value: departments.length, clr: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', ring: 'ring-blue-200 dark:ring-blue-800' },
+        { label: 'Active', value: departments.filter(d => d.isActive).length, clr: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', ring: 'ring-green-200 dark:ring-green-800' },
+        { label: 'Blocked', value: departments.filter(d => !d.isActive).length, clr: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', ring: 'ring-red-200 dark:ring-red-800' },
+        { label: 'Sub-Depts', value: departments.reduce((s, d) => s + (d.subDepartmentCount || 0), 0), clr: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20', ring: 'ring-purple-200 dark:ring-purple-800' },
     ];
 
 
@@ -508,9 +510,9 @@ const Departments = () => {
                     {/* Filter tabs */}
                     <div className="flex items-center bg-white dark:bg-[#1e293b] border border-[var(--border-color)] rounded-2xl p-1 gap-0.5">
                         {[
-                            { id: 'all',     label: 'All',     ac: 'bg-[#0ea5e9] text-white' },
-                            { id: 'active',  label: 'Active',  ac: 'bg-green-500 text-white' },
-                            { id: 'blocked', label: 'Blocked', ac: 'bg-red-500 text-white'   },
+                            { id: 'all', label: 'All', ac: 'bg-[#0ea5e9] text-white' },
+                            { id: 'active', label: 'Active', ac: 'bg-green-500 text-white' },
+                            { id: 'blocked', label: 'Blocked', ac: 'bg-red-500 text-white' },
                         ].map(f => (
                             <button key={f.id} onClick={() => { setStatusFilter(f.id); setCurrentPage(1); }}
                                 className={`px-4 py-2 rounded-xl text-[0.62rem] font-black uppercase transition-all ${statusFilter === f.id ? f.ac : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
@@ -649,21 +651,21 @@ const Departments = () => {
                                 </tbody>
                             </table>
                         </div>
-                    <div className="p-5 border-t border-[var(--border-color-light)]">
-                        <Pagination 
-                            currentPage={currentPage}
-                            totalPages={deptPages}
-                            totalItems={filteredDepts.length}
-                            itemsPerPage={ITEMS}
-                            onPageChange={setCurrentPage}
-                        />
-                    </div>
+                        <div className="p-5 border-t border-[var(--border-color-light)]">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={deptPages}
+                                totalItems={filteredDepts.length}
+                                itemsPerPage={ITEMS}
+                                onPageChange={setCurrentPage}
+                            />
+                        </div>
                     </div>
                 )}
 
                 {viewMode === 'grid' && (
                     <div className="mt-6">
-                        <Pagination 
+                        <Pagination
                             currentPage={currentPage}
                             totalPages={deptPages}
                             totalItems={filteredDepts.length}
@@ -681,29 +683,29 @@ const Departments = () => {
 
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-[0.6rem] font-black text-[var(--text-muted)] uppercase tracking-widest flex-wrap animate-in slide-in-from-left-4 duration-500">
-                    <button 
+                    <button
                         type="button"
-                        onClick={goBack} 
+                        onClick={goBack}
                         className="flex items-center gap-1.5 hover:text-blue-500 transition-colors bg-transparent border-none p-0 cursor-pointer group"
                     >
-                        <Building2 size={11} className="group-hover:scale-110 transition-transform" /> 
+                        <Building2 size={11} className="group-hover:scale-110 transition-transform" />
                         <span>Departments</span>
                     </button>
-                    
+
                     <ChevronRight size={10} className="opacity-40" />
-                    
-                    <button 
+
+                    <button
                         type="button"
                         onClick={goBack}
                         className="flex items-center gap-1.5 hover:text-blue-500 transition-colors bg-transparent border-none p-0 cursor-pointer group"
                     >
                         <span className="text-[var(--text-main)] group-hover:underline underline-offset-4">{selectedDept?.name}</span>
                     </button>
-                    
+
                     <ChevronRight size={10} className="opacity-40" />
-                    
+
                     <div className="text-purple-500 flex items-center gap-1.5">
-                        <Layers size={11} /> 
+                        <Layers size={11} />
                         <span>Sub-Departments</span>
                     </div>
                 </nav>
@@ -729,7 +731,7 @@ const Departments = () => {
                                 </span>
                             </div>
                             {selectedDept?.description && <p className="text-[0.72rem] text-[var(--text-muted)] font-medium leading-relaxed line-clamp-2">{selectedDept.description}</p>}
-                            {selectedDept?.details     && <p className="text-[0.68rem] text-[var(--text-muted)] opacity-70 mt-0.5 line-clamp-1 italic">{selectedDept.details}</p>}
+                            {selectedDept?.details && <p className="text-[0.68rem] text-[var(--text-muted)] opacity-70 mt-0.5 line-clamp-1 italic">{selectedDept.details}</p>}
                         </div>
 
                         {/* Actions: View | Edit | Toggle */}
@@ -808,7 +810,7 @@ const Departments = () => {
                                     {/* Body */}
                                     <div className="p-5">
                                         <h3 className="text-base font-black text-[var(--text-main)] mb-1 truncate">{sub.name}</h3>
-                                        {sub.info        && <p className="text-[0.65rem] text-purple-500 font-bold mb-1">{sub.info}</p>}
+                                        {sub.info && <p className="text-[0.65rem] text-purple-500 font-bold mb-1">{sub.info}</p>}
                                         {sub.description && <p className="text-[0.7rem] text-[var(--text-muted)] line-clamp-2 leading-relaxed">{sub.description}</p>}
 
                                         <div className="mt-4 pt-4 border-t border-[var(--border-color-light)]">
@@ -889,7 +891,7 @@ const Departments = () => {
                             </table>
                         </div>
                         <div className="p-5 border-t border-[var(--border-color-light)]">
-                            <Pagination 
+                            <Pagination
                                 currentPage={currentPage}
                                 totalPages={subPages}
                                 totalItems={filteredSubs.length}
@@ -902,7 +904,7 @@ const Departments = () => {
 
                 {viewMode === 'grid' && (
                     <div className="mt-8">
-                        <Pagination 
+                        <Pagination
                             currentPage={currentPage}
                             totalPages={subPages}
                             totalItems={filteredSubs.length}

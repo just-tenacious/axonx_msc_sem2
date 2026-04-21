@@ -3,11 +3,11 @@ import userRoutes from "./userRoutes.js";
 import availabilityRoutes from "./availabilityRoutes.js";
 import departmentController from "../controllers/departmentController.js";
 import subDeptController from "../controllers/subDeptController.js";
-import appointmentController from "../controllers/appointmentController.js";
-import researchController from "../controllers/researchController.js";
 import * as contactController from "../controllers/contactController.js";
 import eventRoutes from "./eventRoutes.js";
-import browseHistoryRoutes from "./browseHistoryRoutes.js";
+import interactionRoutes from "./interactionRoutes.js";
+import researchRoutes from "./researchRoutes.js";
+import appointmentRoutes from "./appointmentRoutes.js";
 
 const router = express.Router();
 
@@ -15,7 +15,9 @@ const router = express.Router();
 router.use("/users", userRoutes);
 router.use("/availability", availabilityRoutes);
 router.use("/events", eventRoutes);
-router.use("/browse-history", browseHistoryRoutes);
+router.use("/interactions", interactionRoutes);
+router.use("/appointments", appointmentRoutes);
+router.use("/research-papers", researchRoutes);
 
 // ── Department Routes (custom controller with block/revoke + subdept count) ──
 router.get("/departments",             departmentController.getAll);
@@ -43,11 +45,6 @@ router.put("/sub-departments/:id",          subDeptController.update);
 router.delete("/sub-departments/:id",       subDeptController.delete);
 router.patch("/sub-departments/:id/block",  subDeptController.block);
 router.patch("/sub-departments/:id/revoke", subDeptController.revoke);
-router.get("/appointments/stats", appointmentController.getStats);
-mapBasicRoutes("/appointments", appointmentController);
-mapBasicRoutes("/research-papers", researchController);
-router.patch("/research-papers/:id/status", researchController.updateNodalStatus);
-
 // ── Support/Contact Routes ──
 router.get("/support/queries",    contactController.getAllQueries);
 router.post("/support/queries",   contactController.createQuery);

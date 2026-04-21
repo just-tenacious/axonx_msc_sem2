@@ -30,7 +30,7 @@ const Login = () => {
       const foundUser = response.data.data;
 
       if (foundUser.isActive === false) {
-        toast.error('Account is currently de-activated');
+        navigate('/suspended');
         setLoading(false);
         return;
       }

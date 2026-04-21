@@ -18,6 +18,7 @@ const schema = new mongoose.Schema({
   category: { type: String, default: "Conference" },
   location: { type: String },
   timings: { type: String },
+  registrationUrl: { type: String },
   startDate: { type: Date },
   endDate: { type: Date }
 }, { timestamps: true });

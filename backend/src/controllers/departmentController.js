@@ -110,6 +110,7 @@ export default {
                 logger.success("Department updated", updated._id);
                 res.status(200).json({ success: true, data: await withSubCount(updated) });
             } catch (error) {
+                console.error("DEPT_UPDATE_ERROR:", error);
                 logger.error("Error updating department", error.message);
                 res.status(400).json({ success: false, error: error.message });
             }

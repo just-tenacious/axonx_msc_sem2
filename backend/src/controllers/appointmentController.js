@@ -70,14 +70,32 @@ const appointmentController = {
         }
     },
 
+    getHistory: async (req, res) => {
+        try {
+            const { userId, role } = req.query;
+            let query = {};
+            if (role === 'doctor') query.doctorId = userId;
+            else query.patientId = userId;
+
+            const history = await Appointment.find(query)
+                .populate('patientId', 'name avatar role')
+                .populate('doctorId', 'name avatar role')
+                .sort({ date: -1 });
+
+            res.status(200).json({ success: true, data: history });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
+
     create: async (req, res) => {
         try {
             const { patientId, doctorId } = req.body;
             
             // Validate Patient/Student
             const patient = await User.findById(patientId);
-            if (!patient || (patient.role !== 'patient' && patient.role !== 'student')) {
-                return res.status(400).json({ success: false, error: "Invalid client node. Must be Patient or Student." });
+            if (!patient || patient.role === 'admin') {
+                return res.status(400).json({ success: false, error: "Invalid client node. Admin accounts cannot book clinical sessions." });
             }
 
             // Validate Doctor

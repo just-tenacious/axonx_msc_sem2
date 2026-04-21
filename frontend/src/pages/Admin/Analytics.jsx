@@ -35,7 +35,8 @@ const Analytics = () => {
         events: [],
         departments: [],
         subDepts: [],
-        queries: []
+        queries: [],
+        history: []
     });
 
     useEffect(() => {
@@ -45,14 +46,15 @@ const Analytics = () => {
     const fetchAllData = async () => {
         try {
             setLoading(true);
-            const [u, a, r, e, d, q, sd] = await Promise.all([
+            const [u, a, r, e, d, q, sd, h] = await Promise.all([
                 axios.get(`${BASE_URL}/users`).catch(() => ({ data: { data: [] } })),
                 axios.get(`${BASE_URL}/appointments`).catch(() => ({ data: { data: [] } })),
                 axios.get(`${BASE_URL}/research-papers`).catch(() => ({ data: { data: [] } })),
                 axios.get(`${BASE_URL}/events`).catch(() => ({ data: { data: [] } })),
                 axios.get(`${BASE_URL}/departments`).catch(() => ({ data: { data: [] } })),
                 axios.get(`${BASE_URL}/support/queries`).catch(() => ({ data: { data: [] } })),
-                axios.get(`${BASE_URL}/sub-departments`).catch(() => ({ data: { data: [] } }))
+                axios.get(`${BASE_URL}/sub-departments`).catch(() => ({ data: { data: [] } })),
+                axios.get(`${BASE_URL}/browse-history`).catch(() => ({ data: { data: [] } }))
             ]);
 
             setData({
@@ -62,7 +64,8 @@ const Analytics = () => {
                 events: e.data?.data || [],
                 departments: d.data?.data || [],
                 queries: q.data?.data || [],
-                subDepts: sd.data?.data || []
+                subDepts: sd.data?.data || [],
+                history: h.data?.data || []
             });
         } catch (err) {
             toast.error("Could not load data.");
@@ -87,10 +90,17 @@ const Analytics = () => {
     ], [data.users]);
 
     const deptStats = useMemo(() => {
-        return data.departments.map(d => ({
-            name: d.name,
-            SubDepts: data.subDepts.filter(sd => (sd.departmentId?._id || sd.departmentId) === d._id).length
-        })).sort((a,b) => b.SubDepts - a.SubDepts);
+        // Since browse-history is removed, we now analyze structural density
+        // (Number of sub-departments per department)
+        return data.departments.map(dept => {
+            const count = data.subDepts.filter(sd => 
+                (sd.departmentId?._id || sd.departmentId) === dept._id
+            ).length;
+            return {
+                name: dept.name,
+                Density: count
+            };
+        }).sort((a,b) => b.Density - a.Density).slice(0, 10);
     }, [data.departments, data.subDepts]);
 
     const researchStatusStats = useMemo(() => {
@@ -170,15 +180,15 @@ const Analytics = () => {
             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pdfHeight;
 
-            // Add subsequent pages if content overflows
-            while (heightLeft >= 0) {
+            // Add subsequent pages
+            while (heightLeft > 0) {
                 position = heightLeft - imgHeight;
                 pdf.addPage();
                 pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                 heightLeft -= pdfHeight;
             }
 
-            pdf.save(`System_Audit_${new Date().toLocaleDateString()}.pdf`);
+            pdf.save(`AxonX_Analytics_Report_${new Date().getTime()}.pdf`);
             
             toast.dismiss('report');
             toast.success("Report saved successfully!");
@@ -307,15 +317,27 @@ const Analytics = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div className="bg-white dark:bg-slate-900 p-10 rounded-[56px] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-8">
-                        <h3 className="font-black text-xl text-slate-900 dark:text-white uppercase mb-4">Department Structure</h3>
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-black text-xl text-slate-900 dark:text-white uppercase italic flex items-center gap-3">
+                                <LayoutGrid size={24} className="text-blue-600" /> Clinical Node Density
+                            </h3>
+                            <span className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-full">Sub-Depts / Dept</span>
+                        </div>
                         <div style={{ width: '100%', height: 350 }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={deptStats}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 900}} height={60} angle={-45} textAnchor="end" />
                                     <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 900}} />
-                                    <Tooltip cursor={{fill: 'transparent'}} />
-                                    <Bar dataKey="SubDepts" fill="#8b5cf6" radius={[10, 10, 10, 10]} barSize={40} />
+                                    <Tooltip 
+                                        cursor={{fill: 'rgba(37, 99, 235, 0.05)'}} 
+                                        contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)'}} 
+                                    />
+                                    <Bar dataKey="Density" fill="#2563eb" radius={[12, 12, 0, 0]} barSize={45}>
+                                        {deptStats.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#2563eb' : '#3b82f6'} fillOpacity={1 - index * 0.05} />
+                                        ))}
+                                    </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -363,7 +385,7 @@ const Analytics = () => {
                 </div>
 
                 <div className="mb-12">
-                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><TrendingUp size={20}/> Key Performance Metrics</h2>
+                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><TrendingUp size={20}/> 1. Key Performance Metrics</h2>
                     <div className="grid grid-cols-4 gap-6 mb-12">
                         {[
                             { l: 'Total Specialists', v: data.users.filter(u => u.role === 'doctor').length },
@@ -384,7 +406,22 @@ const Analytics = () => {
                 </div>
 
                 <div className="mb-12">
-                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><Users size={20}/> 1. User Base Distribution</h2>
+                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><FileText size={20}/> 2. Top Performing Research</h2>
+                    <div className="grid grid-cols-3 gap-6">
+                        {topResearch.map((r, i) => (
+                            <div key={i} className="bg-slate-900 p-6 rounded-[32px] text-white">
+                                <h4 className="text-sm font-black mb-4 line-clamp-2">{r.title}</h4>
+                                <div className="flex justify-between text-[0.6rem] font-black uppercase text-white/40">
+                                    <span>Likes: {r.likes}</span>
+                                    <span>Views: {r.views}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="mb-12">
+                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><Users size={20}/> 3. User Base Distribution</h2>
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-900 text-white font-black text-[0.65rem] uppercase tracking-widest">
@@ -408,7 +445,7 @@ const Analytics = () => {
                 </div>
 
                 <div className="mb-12">
-                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><Building2 size={20}/> 2. Departmental Capacity</h2>
+                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><Building2 size={20}/> 4. Departmental Capacity</h2>
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-900 text-white font-black text-[0.65rem] uppercase tracking-widest">
@@ -419,12 +456,12 @@ const Analytics = () => {
                             </tr>
                         </thead>
                         <tbody className="text-sm font-bold">
-                            {deptStats.slice(0, 15).map((d, i) => (
+                            {deptStats.map((d, i) => (
                                 <tr key={i} className="border-b border-slate-100">
                                     <td className="p-4 text-slate-900">{d.name}</td>
-                                    <td className="p-4 text-purple-600">{d.SubDepts} Units</td>
-                                    <td className="p-4 text-slate-500">{Math.floor(Math.random() * 15) + 5} Nodes</td>
-                                    <td className="p-4 text-blue-600">Optimal</td>
+                                    <td className="p-4 text-blue-600">{d.Density} Sub-Depts</td>
+                                    <td className="p-4 text-slate-500">{data.users.filter(u => u.role === 'doctor' && (u.departmentId?._id || u.departmentId) === (data.departments.find(dept => dept.name === d.name)?._id)).length} Specialists</td>
+                                    <td className="p-4 text-blue-600">Active Node</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -432,7 +469,7 @@ const Analytics = () => {
                 </div>
 
                 <div className="mb-12">
-                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><ShieldCheck size={20}/> 3. Support & Integrity Index</h2>
+                    <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><ShieldCheck size={20}/> 5. Support & Integrity Index</h2>
                     <div className="grid grid-cols-2 gap-10">
                         <div className="p-10 bg-slate-50 rounded-[40px] border border-slate-100">
                             <h4 className="text-sm font-black uppercase mb-4 text-slate-400">Response Summary</h4>

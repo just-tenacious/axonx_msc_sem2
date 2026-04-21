@@ -36,6 +36,16 @@ const eventController = {
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
+    },
+
+    getByHospital: async (req, res) => {
+        try {
+            const { hospitalId } = req.params;
+            const docs = await Event.find({ hospitalId }).sort({ startDate: -1 });
+            res.status(200).json({ success: true, data: docs });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
     }
 };
 

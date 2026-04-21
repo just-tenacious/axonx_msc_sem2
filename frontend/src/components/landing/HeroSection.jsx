@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
-    <section style={{ position: 'relative', paddingTop: '10rem', paddingBottom: '8rem', overflow: 'hidden', minHeight: 'calc(100vh - 5rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section style={{ position: 'relative', paddingTop: '12rem', paddingBottom: '10rem', overflow: 'hidden', minHeight: 'calc(100vh - 5rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       {/* Background glow */}
       <div style={{
         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
@@ -28,25 +28,19 @@ const HeroSection = () => {
               marginBottom: '1.5rem',
               letterSpacing: '-0.025em'
             }} className="text-slate-900 dark:text-white">
-              Uniting{' '}
+              <span className="opacity-70">Precision.</span> <br />
               <span style={{
-                background: 'linear-gradient(90deg, #0ea5e9, #10b981)',
+                background: 'linear-gradient(135deg, #0ea5e9 0%, #10b981 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>Healers.</span>
-              <br />
-              Advancing{' '}
-              <span style={{
-                background: 'linear-gradient(90deg, #0ea5e9, #10b981)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>Health.</span>
+                backgroundClip: 'text',
+                filter: 'drop-shadow(0 10px 20px rgba(14, 165, 233, 0.1))'
+              }}>Intelligence.</span><br />
+              AxonX.
             </h1>
 
             <p style={{ fontSize: '1.125rem', lineHeight: 1.75, marginBottom: '2.5rem', maxWidth: '36rem' }} className="text-slate-600 dark:text-slate-400">
-              The ultimate medical ecosystem. Whether you're a patient seeking answers, a researcher publishing breakthroughs, or a hospital hosting events, AxonX bridges the gap.
+              Navigate the world\'s most advanced clinical discovery and medical intelligence network to find elite specialists and world-class healthcare nodes.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">

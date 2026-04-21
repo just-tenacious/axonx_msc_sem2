@@ -25,16 +25,16 @@ const FeaturesSection = () => {
             fontWeight: 700,
             marginBottom: '1rem'
           }} className="text-slate-900 dark:text-white">
-            Core{' '}
+            Clinical{' '}
             <span style={{
               background: 'linear-gradient(135deg, #38bdf8, #34d399)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
-            }}>Capabilities</span>
+            }}>Intelligence</span>
           </h2>
           <p style={{ fontSize: '1.125rem', maxWidth: '42rem', margin: '0 auto' }} className="text-slate-600 dark:text-slate-400">
-            Everything you need to grow your medical network and stay informed.
+            Advanced medical infrastructure for doctors, researchers, and healthcare institutions.
           </p>
         </div>
 

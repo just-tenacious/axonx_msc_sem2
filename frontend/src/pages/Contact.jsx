@@ -101,15 +101,20 @@ const Contact = () => {
                                 />
                             </div>
 
-                            <div className="space-y-1.5">
+                            <div className="space-y-1.5 text-left">
                                 <label className="text-[0.7rem] font-bold text-[#475569]">Inquiry Type</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="General Support" 
-                                    className="w-full px-4 py-3 bg-[#f8fafc] rounded-xl border border-slate-200 focus:outline-none focus:ring-2 ring-[#14b8a6]/20 transition-all text-sm placeholder:text-slate-700 text-slate-700"
+                                <select 
+                                    className="w-full px-4 py-3 bg-[#f8fafc] rounded-xl border border-slate-200 focus:outline-none focus:ring-2 ring-[#14b8a6]/20 transition-all text-sm text-slate-700 font-medium appearance-none cursor-pointer"
                                     value={formData.inquiryType}
                                     onChange={e => setFormData({...formData, inquiryType: e.target.value})}
-                                />
+                                >
+                                    <option value="General Support">General Support</option>
+                                    <option value="Hospital Partnership">Hospital Partnership</option>
+                                    <option value="Research Collaboration">Research Collaboration</option>
+                                    <option value="Technical Issue">Technical Issue</option>
+                                    <option value="Appointment Assistance">Appointment Assistance</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
 
                             <div className="space-y-1.5">

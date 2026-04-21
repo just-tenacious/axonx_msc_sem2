@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import User from "../models/User.js";
+import Review from "../models/Review.js";
 import { createBaseController } from "./baseController.js";
 import logger from "../utils/logger.js";
 
@@ -12,7 +14,36 @@ export default {
         try {
             const filter = {};
             if (req.query.role) filter.role = req.query.role;
-            const users = await User.find(filter).select('-password');
+            if (req.query.hospitalId) filter.hospitalId = req.query.hospitalId;
+            if (req.query.departmentId) filter.departmentId = req.query.departmentId;
+            if (req.query.subDepartmentId) filter.subDepartmentId = req.query.subDepartmentId;
+            const users = await User.find(filter).select('-password').lean();
+
+            // Fetch average ratings for all doctors
+            if (!req.query.role || req.query.role === 'doctor') {
+                const reviews = await Review.aggregate([
+                    {
+                        $group: {
+                            _id: "$doctorId",
+                            avgRating: { $avg: "$rating" }
+                        }
+                    }
+                ]);
+
+                // Create a map for quick lookup
+                const ratingMap = reviews.reduce((acc, rev) => {
+                    if (rev._id) acc[rev._id.toString()] = rev.avgRating;
+                    return acc;
+                }, {});
+
+                // Inject rating into doctor objects
+                users.forEach(u => {
+                    if (u.role === 'doctor') {
+                        u.rating = ratingMap[u._id.toString()] || 0;
+                    }
+                });
+            }
+
             res.status(200).json({ success: true, count: users.length, data: users });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
